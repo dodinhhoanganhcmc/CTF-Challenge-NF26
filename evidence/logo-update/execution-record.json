@@ -1,0 +1,98 @@
+[
+  {
+    "label": "BASELINE",
+    "command": ".venv\\Scripts\\python.exe evidence/logo-update/check_branding.py evidence/logo-update/baseline",
+    "input": "Preserved pre-logo source; GET /api/v1/catalog and both asset paths.",
+    "stdout": "BRANDING logo_ready=false primary=missing alternative=missing\n",
+    "stderr": "",
+    "exit": 0
+  },
+  {
+    "label": "MODIFIED",
+    "command": ".venv\\Scripts\\python.exe evidence/logo-update/check_branding.py .",
+    "input": "Current source; GET /api/v1/catalog and both decoded official asset files.",
+    "stdout": "BRANDING logo_ready=true primary=1024x1024 alternative=1024x1024\n",
+    "stderr": "",
+    "exit": 0
+  },
+  {
+    "label": "PALETTE",
+    "command": ".venv\\Scripts\\python.exe scripts/check_palette.py",
+    "input": "Actual CSS tokens; 34 WCAG text/UI pairs.",
+    "stdout": "PALETTE_OK pairs=34 min_text=5.16 min_ui=3.69\n",
+    "stderr": "",
+    "exit": 0
+  },
+  {
+    "label": "API_TESTS",
+    "command": ".venv\\Scripts\\python.exe -m pytest backend/tests -q",
+    "input": "Both real puzzle journeys, progression, persistence, reward and input controls.",
+    "stdout": "............................                                             [100%]\n28 passed in 3.27s\n",
+    "stderr": "",
+    "exit": 0
+  },
+  {
+    "label": "TYPECHECK",
+    "command": "npm run typecheck",
+    "input": "All TypeScript including ClubLogo and gameplay.",
+    "stdout": "\n> dao-mat-ma@1.0.0 typecheck\n> tsc --noEmit\n\n",
+    "stderr": "",
+    "exit": 0
+  },
+  {
+    "label": "BUILD",
+    "command": "npm run build",
+    "input": "Production application with supplied opaque logo pair.",
+    "stdout": "\n> dao-mat-ma@1.0.0 build\n> next build\n\n▲ Next.js 16.4.3 (Turbopack)\n✓ Running next.config.ts took 39ms\n\n  Creating an optimized production build ...\n✓ Compiled successfully in 477ms\n  Running TypeScript ...\n  Finished TypeScript in 1604ms ...\n  Collecting page data using 5 workers ...\n  Generating static pages using 5 workers (0/3) ...\n✓ Generating static pages using 5 workers (3/3) in 415ms\n  Finalizing page optimization ...\n\nRoute (app)\n┌ ○ /\n├ ○ /_not-found\n└ ƒ /api/v1/[...path]\n\n\n○  (Static)   prerendered as static content\nƒ  (Dynamic)  server-rendered on demand\n\n",
+    "stderr": "",
+    "exit": 0
+  },
+  {
+    "label": "E2E",
+    "command": "npm run test:e2e",
+    "input": "Production browser; both full journeys; 5 widths × 2 themes; header/footer/reward logos; axe including dark secondary controls.",
+    "stdout": "\n> dao-mat-ma@1.0.0 test:e2e\n> playwright test\n\n\nRunning 7 tests using 1 worker\n\n  ✓  1 tests\\game.spec.ts:23:5 › all learning-bench methods and input errors (12ms)\n  ✓  2 tests\\game.spec.ts:70:7 › complete five-stage easy journey, reward, restart and leaderboard (4.9s)\n  ✓  3 tests\\game.spec.ts:70:7 › complete five-stage hard journey, reward, restart and leaderboard (5.3s)\n  ✓  4 tests\\game.spec.ts:130:5 › hints, download, journal, guide, replay and theme controls (2.3s)\n  ✓  5 tests\\game.spec.ts:157:5 › proxy origin, allowlist, body limits and session isolation (131ms)\n  ✓  6 tests\\game.spec.ts:168:5 › responsive light/dark, keyboard, accessibility and visual evidence (14.4s)\n  ✓  7 tests\\game.spec.ts:206:5 › official logo assets are served and authorize the real reward artwork (28ms)\n\n  7 passed (32.5s)\n",
+    "stderr": "[WebServer] INFO:     Started server process [44960]\n[WebServer] INFO:     Waiting for application startup.\n[WebServer] INFO:     Application startup complete.\n[WebServer] INFO:     Uvicorn running on http://127.0.0.1:8100 (Press CTRL+C to quit)\n[WebServer] (node:2776) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)\n(node:24580) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+    "exit": 0
+  },
+  {
+    "label": "NPM_AUDIT",
+    "command": "npm audit --json",
+    "input": "Current package-lock.json",
+    "stdout": "{\n  \"auditReportVersion\": 2,\n  \"vulnerabilities\": {},\n  \"metadata\": {\n    \"vulnerabilities\": {\n      \"info\": 0,\n      \"low\": 0,\n      \"moderate\": 0,\n      \"high\": 0,\n      \"critical\": 0,\n      \"total\": 0\n    },\n    \"dependencies\": {\n      \"prod\": 23,\n      \"dev\": 48,\n      \"optional\": 61,\n      \"peer\": 0,\n      \"peerOptional\": 0,\n      \"total\": 108\n    }\n  }\n}\n",
+    "stderr": "",
+    "exit": 0
+  },
+  {
+    "label": "PIP_AUDIT",
+    "command": ".venv\\Scripts\\python.exe -m pip_audit -r backend/requirements-lock.txt --format=json",
+    "input": "Current Python dependency lock",
+    "stdout": "{\"dependencies\": [{\"name\": \"annotated-doc\", \"version\": \"0.0.5\", \"vulns\": []}, {\"name\": \"annotated-types\", \"version\": \"0.8.0\", \"vulns\": []}, {\"name\": \"anyio\", \"version\": \"4.15.1\", \"vulns\": []}, {\"name\": \"certifi\", \"version\": \"2026.10.23\", \"vulns\": []}, {\"name\": \"click\", \"version\": \"8.5.0\", \"vulns\": []}, {\"name\": \"colorama\", \"version\": \"0.4.6\", \"vulns\": []}, {\"name\": \"fastapi\", \"version\": \"0.135.1\", \"vulns\": []}, {\"name\": \"h11\", \"version\": \"0.16.0\", \"vulns\": []}, {\"name\": \"httpcore2\", \"version\": \"2.16.0\", \"vulns\": []}, {\"name\": \"httpcore\", \"version\": \"1.0.9\", \"vulns\": []}, {\"name\": \"httpx2\", \"version\": \"2.16.0\", \"vulns\": []}, {\"name\": \"httpx\", \"version\": \"0.28.1\", \"vulns\": []}, {\"name\": \"idna\", \"version\": \"3.20\", \"vulns\": []}, {\"name\": \"iniconfig\", \"version\": \"2.3.1\", \"vulns\": []}, {\"name\": \"pillow\", \"version\": \"13.0.0\", \"vulns\": []}, {\"name\": \"pluggy\", \"version\": \"1.7.0\", \"vulns\": []}, {\"name\": \"pydantic-core\", \"version\": \"2.50.1\", \"vulns\": []}, {\"name\": \"pydantic\", \"version\": \"2.14.1\", \"vulns\": []}, {\"name\": \"pygments\", \"version\": \"2.21.0\", \"vulns\": []}, {\"name\": \"pytest\", \"version\": \"9.1.1\", \"vulns\": []}, {\"name\": \"pyyaml\", \"version\": \"6.0.3\", \"vulns\": []}, {\"name\": \"starlette\", \"version\": \"1.9.0\", \"vulns\": []}, {\"name\": \"truststore\", \"version\": \"0.10.5\", \"vulns\": []}, {\"name\": \"typing-extensions\", \"version\": \"4.16.0\", \"vulns\": []}, {\"name\": \"typing-inspection\", \"version\": \"0.4.4\", \"vulns\": []}, {\"name\": \"uvicorn\", \"version\": \"0.41.0\", \"vulns\": []}], \"fixes\": []}\n",
+    "stderr": "No known vulnerabilities found\n",
+    "exit": 0
+  },
+  {
+    "label": "OPENAPI",
+    "command": "npx --yes @redocly/cli lint docs/openapi.json --format=summary",
+    "input": "Current OpenAPI contract",
+    "stdout": "",
+    "stderr": "validating docs\\openapi.json...\ndocs\\openapi.json: validated in 26ms\n\nWoohoo! Your API description is valid. 🎉\n\n",
+    "exit": 0
+  },
+  {
+    "label": "ROLLBACK",
+    "command": "\"C:\\Program Files\\Git\\bin\\bash.exe\" evidence/logo-update/ROLLBACK.sh L:/ctf-chall/evidence/logo-update/rollback-copy",
+    "input": "Dedicated copy only; original source hashes verified before restoring.",
+    "stdout": "ROLLBACK_OK restored=43 removed=4\n",
+    "stderr": "",
+    "exit": 0
+  },
+  {
+    "label": "RESTORED",
+    "command": ".venv\\Scripts\\python.exe evidence/logo-update/check_branding.py evidence/logo-update/rollback-copy",
+    "input": "Restored copy; pre-logo behavior while the real working copy stays branded.",
+    "stdout": "BRANDING logo_ready=false primary=missing alternative=missing\n",
+    "stderr": "",
+    "exit": 0
+  }
+]

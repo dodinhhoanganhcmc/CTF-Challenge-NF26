@@ -1,0 +1,3 @@
+DEPLOYED http://127.0.0.1:3000 HTTP 200 logo_ready=true optimized_dark=256x256 optimized_light=256x256 opaque=true
+GAMEPLAY guest=201 first_stage=200
+SOURCE_HASHES current=47 all_match=true

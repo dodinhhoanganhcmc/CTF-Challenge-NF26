@@ -1,0 +1,2 @@
+# ADR 001: Same-origin proxy and persistent anonymous sessions
+Accepted. Next.js forwards only known API routes to the fixed BACKEND_URL. FastAPI checks session, CSRF and progression independently. SQLite is the shared authority, including rate counters. Deploy one API instance on persistent disk; horizontal scaling requires a shared database. Puzzle artifacts are inert text/PNG, not runnable vulnerable services. No external AI model is needed for beginner learning.

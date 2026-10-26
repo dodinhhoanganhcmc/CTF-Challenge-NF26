@@ -1,0 +1,19 @@
+{
+  ".gitignore": "e1dc83659c07ef1a19bf79f3f5f5f6c7632ba0d883a13ed5c208163d250ce134",
+  "AGENTS.md": "09f3a9fac5bfa14d70b3d565cbafa6104d10a25a4ecf8780822327eb4ebc410c",
+  "codex-session-01a16c26-3b2f-7da2-8b2b-1f6ace9e78f4.md": "26a933af4fd1fd6d7ee0f4111ffce4f78dbc51c2cd5b71303279a001abc85d37",
+  "CONTEXT.md": "7b1de8705b1943c121a6cf619dfab911f706808e7400b5d721f28f57e537fdb7",
+  "package.json": "f8587a650675e2da10ae81c6b2f33b58fa8df91ce9541de57afbe42b4699f023",
+  "PRODUCT.md": "1bb3198f8a5a38de05905ce78d9890a244a9e4e4be8f62f05a3cd78ee9d1388a",
+  "backend/main.py": "e3f7c0039e35b04d6b697d7ce3a14a9ffb4d336671683cfe55fbb31263933b9f",
+  "backend/puzzles.py": "e3d085835b9b97a9fa57cdbabe8a09628de399942248a54277de2bcfb39bb978",
+  "backend/requirements.txt": "571d773c0517229d97cd33e9627624fdd56cff46ee866fac3b12f190ea7d28bd",
+  "backend/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "docs/visual-direction.md": "fb3bba1eff9eab09dc7bdc90cc5c9ce607ae8e68d9890a980826faaed1ad9c5a",
+  "scripts/check_health.py": "edad4f518ea1841632ca762188a2a4471db8e724c20f577dbaab30918f09db39",
+  "docs/adr/001-single-origin.md": "5e07c857f8acd0797e944f18464aab576de402d82441548c66bd543f2ad4dcfd",
+  "docs/agents/domain.md": "0c5c1e8b14faa851e1f2d7c8c6f4bd888c68a445f92073b97de7416084e87958",
+  "docs/agents/issue-tracker.md": "3ed3cab4aadd59087a18cb640fb90c2228df12b45128a6327099921a07fd92d8",
+  "docs/agents/triage-labels.md": "340a584327e842a09ab91fdffe3a2caae25425259590e737dde74c4309520958",
+  "docs/superpowers/specs/2026-10-24-treasure-ctf-design.md": "a3bafa7ff4098ac3bcb69db6b7c0b9e9d40b0341e06b1017efcc79887e205db3"
+}

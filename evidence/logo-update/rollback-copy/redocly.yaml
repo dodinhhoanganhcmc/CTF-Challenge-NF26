@@ -1,0 +1,5 @@
+extends:
+  - recommended
+rules:
+  # This is a private club-event application, not a licensed public API product.
+  info-license: off

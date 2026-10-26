@@ -1,0 +1,131 @@
+VERIFICATION: smaller footer, same Poppins Bold 700
+Changed fields: desktop footer 16px -> 14px; mobile 14px -> 12px. Poppins Bold 700, copyright, left alignment, backgrounds, logos and gameplay unchanged.
+MODIFIED_FILE: L:\ctf-chall\evidence\footer-size\MODIFIED_FILE.css
+DIFF_FILE: L:\ctf-chall\evidence\footer-size\DIFF_FILE.patch
+VERIFICATION: L:\ctf-chall\evidence\footer-size\VERIFICATION.txt
+ROLLBACK: L:\ctf-chall\evidence\footer-size\ROLLBACK.sh
+Original stylesheet SHA256: 4059d540f6addd86486f310f00395138be6057e5595a9a7fe3f48f36e1b1b084
+Modified stylesheet SHA256: a6b70abbc797dbd721c09637f0ca6ad69502e508839e2aaf9dafc4352e64b284
+
+BASELINE
+COMMAND: .venv\Scripts\python.exe evidence/footer-size/check_state.py evidence/footer-size/baseline
+INPUT: Original footer desktop/mobile sizes and preserved bold weight.
+LITERAL STDOUT:
+{"desktop_px":16,"mobile_px":14,"weight":700}
+
+LITERAL STDERR:
+
+EXIT STATUS: 0
+
+MODIFIED
+COMMAND: .venv\Scripts\python.exe evidence/footer-size/check_state.py .
+INPUT: Desktop footer 14px, mobile 12px; unchanged Poppins Bold 700 and left alignment.
+LITERAL STDOUT:
+{"desktop_px":14,"mobile_px":12,"weight":700}
+
+LITERAL STDERR:
+
+EXIT STATUS: 0
+
+TYPECHECK
+COMMAND: npm run typecheck
+INPUT: Current TypeScript.
+LITERAL STDOUT:
+
+> dao-mat-ma@1.0.0 typecheck
+> tsc --noEmit
+
+
+LITERAL STDERR:
+
+EXIT STATUS: 0
+
+BUILD
+COMMAND: npm run build
+INPUT: Current production frontend.
+LITERAL STDOUT:
+
+> dao-mat-ma@1.0.0 build
+> next build
+
+▲ Next.js 16.4.3 (Turbopack)
+✓ Running next.config.ts took 32ms
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 4.5s
+  Running TypeScript ...
+  Finished TypeScript in 1477ms ...
+  Collecting page data using 5 workers ...
+  Generating static pages using 5 workers (0/3) ...
+✓ Generating static pages using 5 workers (3/3) in 317ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+└ ƒ /api/v1/[...path]
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+
+LITERAL STDERR:
+
+EXIT STATUS: 0
+
+E2E
+COMMAND: npm run test:e2e
+INPUT: Both journeys; five widths/two themes; unchanged footer copy and left alignment; computed 14px/12px with 700 and actual Poppins Bold platform font; axe checks.
+LITERAL STDOUT:
+
+> dao-mat-ma@1.0.0 test:e2e
+> playwright test
+
+
+Running 7 tests using 1 worker
+
+  ✓  1 tests\game.spec.ts:71:5 › all learning-bench methods and input errors (6ms)
+  ✓  2 tests\game.spec.ts:118:7 › complete five-stage easy journey, reward, restart and leaderboard (3.7s)
+  ✓  3 tests\game.spec.ts:118:7 › complete five-stage hard journey, reward, restart and leaderboard (5.4s)
+  ✓  4 tests\game.spec.ts:180:5 › hints, download, journal, guide, replay and theme controls (2.7s)
+  ✓  5 tests\game.spec.ts:207:5 › proxy origin, allowlist, body limits and session isolation (216ms)
+  ✓  6 tests\game.spec.ts:218:5 › responsive light/dark, keyboard, accessibility and visual evidence (5.6s)
+  ✓  7 tests\game.spec.ts:291:5 › official logo assets are served and authorize the real reward artwork (20ms)
+
+  7 passed (22.7s)
+
+LITERAL STDERR:
+[WebServer] INFO:     Started server process [48992]
+[WebServer] INFO:     Waiting for application startup.
+[WebServer] INFO:     Application startup complete.
+[WebServer] INFO:     Uvicorn running on http://127.0.0.1:8100 (Press CTRL+C to quit)
+[WebServer] (node:36744) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+(node:46876) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+EXIT STATUS: 0
+
+ROLLBACK
+COMMAND: "C:\Program Files\Git\bin\bash.exe" evidence/footer-size/ROLLBACK.sh L:/ctf-chall/evidence/footer-size/rollback-copy
+INPUT: Separate copy; no runtime data touched.
+LITERAL STDOUT:
+ROLLBACK_OK restored=2 removed=0
+
+LITERAL STDERR:
+
+EXIT STATUS: 0
+
+RESTORED
+COMMAND: .venv\Scripts\python.exe evidence/footer-size/check_state.py evidence/footer-size/rollback-copy
+INPUT: Verify previous 16px/14px sizes are restored on the copy only.
+LITERAL STDOUT:
+{"desktop_px":16,"mobile_px":14,"weight":700}
+
+LITERAL STDERR:
+
+EXIT STATUS: 0
+
+Restored behavior/status: desktop 16px/mobile 14px with weight 700 on the separate copy; both original hashes restored.
+Actual project retains smaller 14px/12px footer, Poppins Bold 700 and left alignment.

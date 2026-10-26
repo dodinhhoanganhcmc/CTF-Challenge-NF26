@@ -1,0 +1,19 @@
+{
+  "scope": "footer typography component",
+  "framework": "Next.js App Router",
+  "framework_source": "package.json:16",
+  "font": "self-hosted Vietnamese-capable Poppins 400/500/600/700/800",
+  "font_source": "app/globals.css:4-12",
+  "palette_source": "app/globals.css:18-19",
+  "light": "#FEFEFE",
+  "dark": "#020202",
+  "motion": "existing CSS only; no new motion",
+  "preserve": [
+    "font family",
+    "copy",
+    "16px desktop / 14px mobile",
+    "left alignment",
+    "colors",
+    "gameplay"
+  ]
+}

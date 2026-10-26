@@ -1,0 +1,27 @@
+[
+  {
+    "weight": 400,
+    "source": "https://raw.githubusercontent.com/taxvui/Poppins/de048c07807a174abeda5a93a02baf32ea8312ee/FZ%20Poppins-Regular.ttf",
+    "sha256": "0c3dcccffef5d275fde6d377b9178176a626ddea4dfc9c3a190a46f779136f14"
+  },
+  {
+    "weight": 500,
+    "source": "https://raw.githubusercontent.com/taxvui/Poppins/de048c07807a174abeda5a93a02baf32ea8312ee/FZ%20Poppins-Medium.ttf",
+    "sha256": "138c14f998cf33dbd08186012c103efcb7744eed2ba5fd0c6ce64616ca5e438f"
+  },
+  {
+    "weight": 600,
+    "source": "https://raw.githubusercontent.com/taxvui/Poppins/de048c07807a174abeda5a93a02baf32ea8312ee/FZ%20Poppins-SemiBold.ttf",
+    "sha256": "771741000e3098b8177dd0ce4ae4f8683720d28c3005d1de785d513210e034d8"
+  },
+  {
+    "weight": 700,
+    "source": "https://raw.githubusercontent.com/taxvui/Poppins/de048c07807a174abeda5a93a02baf32ea8312ee/FZ%20Poppins-Bold.ttf",
+    "sha256": "0211e38dd40d5c7f441f3b0d0dcf8a8a5a261c014a87ff43b1aa1813bac17298"
+  },
+  {
+    "weight": 800,
+    "source": "https://raw.githubusercontent.com/taxvui/Poppins/de048c07807a174abeda5a93a02baf32ea8312ee/FZ%20Poppins-ExtraBold.ttf",
+    "sha256": "01abb522c6e648ba0cd0edfdcd285241d9097138ff993d75cb78e55240fd9dfb"
+  }
+]

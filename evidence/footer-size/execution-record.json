@@ -1,0 +1,58 @@
+[
+  {
+    "label": "BASELINE",
+    "command": ".venv\\Scripts\\python.exe evidence/footer-size/check_state.py evidence/footer-size/baseline",
+    "input": "Original footer desktop/mobile sizes and preserved bold weight.",
+    "stdout": "{\"desktop_px\":16,\"mobile_px\":14,\"weight\":700}\n",
+    "stderr": "",
+    "exit": 0
+  },
+  {
+    "label": "MODIFIED",
+    "command": ".venv\\Scripts\\python.exe evidence/footer-size/check_state.py .",
+    "input": "Desktop footer 14px, mobile 12px; unchanged Poppins Bold 700 and left alignment.",
+    "stdout": "{\"desktop_px\":14,\"mobile_px\":12,\"weight\":700}\n",
+    "stderr": "",
+    "exit": 0
+  },
+  {
+    "label": "TYPECHECK",
+    "command": "npm run typecheck",
+    "input": "Current TypeScript.",
+    "stdout": "\n> dao-mat-ma@1.0.0 typecheck\n> tsc --noEmit\n\n",
+    "stderr": "",
+    "exit": 0
+  },
+  {
+    "label": "BUILD",
+    "command": "npm run build",
+    "input": "Current production frontend.",
+    "stdout": "\n> dao-mat-ma@1.0.0 build\n> next build\n\n▲ Next.js 16.4.3 (Turbopack)\n✓ Running next.config.ts took 32ms\n\n  Creating an optimized production build ...\n✓ Compiled successfully in 4.5s\n  Running TypeScript ...\n  Finished TypeScript in 1477ms ...\n  Collecting page data using 5 workers ...\n  Generating static pages using 5 workers (0/3) ...\n✓ Generating static pages using 5 workers (3/3) in 317ms\n  Finalizing page optimization ...\n\nRoute (app)\n┌ ○ /\n├ ○ /_not-found\n└ ƒ /api/v1/[...path]\n\n\n○  (Static)   prerendered as static content\nƒ  (Dynamic)  server-rendered on demand\n\n",
+    "stderr": "",
+    "exit": 0
+  },
+  {
+    "label": "E2E",
+    "command": "npm run test:e2e",
+    "input": "Both journeys; five widths/two themes; unchanged footer copy and left alignment; computed 14px/12px with 700 and actual Poppins Bold platform font; axe checks.",
+    "stdout": "\n> dao-mat-ma@1.0.0 test:e2e\n> playwright test\n\n\nRunning 7 tests using 1 worker\n\n  ✓  1 tests\\game.spec.ts:71:5 › all learning-bench methods and input errors (6ms)\n  ✓  2 tests\\game.spec.ts:118:7 › complete five-stage easy journey, reward, restart and leaderboard (3.7s)\n  ✓  3 tests\\game.spec.ts:118:7 › complete five-stage hard journey, reward, restart and leaderboard (5.4s)\n  ✓  4 tests\\game.spec.ts:180:5 › hints, download, journal, guide, replay and theme controls (2.7s)\n  ✓  5 tests\\game.spec.ts:207:5 › proxy origin, allowlist, body limits and session isolation (216ms)\n  ✓  6 tests\\game.spec.ts:218:5 › responsive light/dark, keyboard, accessibility and visual evidence (5.6s)\n  ✓  7 tests\\game.spec.ts:291:5 › official logo assets are served and authorize the real reward artwork (20ms)\n\n  7 passed (22.7s)\n",
+    "stderr": "[WebServer] INFO:     Started server process [48992]\n[WebServer] INFO:     Waiting for application startup.\n[WebServer] INFO:     Application startup complete.\n[WebServer] INFO:     Uvicorn running on http://127.0.0.1:8100 (Press CTRL+C to quit)\n[WebServer] (node:36744) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)\n(node:46876) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+    "exit": 0
+  },
+  {
+    "label": "ROLLBACK",
+    "command": "\"C:\\Program Files\\Git\\bin\\bash.exe\" evidence/footer-size/ROLLBACK.sh L:/ctf-chall/evidence/footer-size/rollback-copy",
+    "input": "Separate copy; no runtime data touched.",
+    "stdout": "ROLLBACK_OK restored=2 removed=0\n",
+    "stderr": "",
+    "exit": 0
+  },
+  {
+    "label": "RESTORED",
+    "command": ".venv\\Scripts\\python.exe evidence/footer-size/check_state.py evidence/footer-size/rollback-copy",
+    "input": "Verify previous 16px/14px sizes are restored on the copy only.",
+    "stdout": "{\"desktop_px\":16,\"mobile_px\":14,\"weight\":700}\n",
+    "stderr": "",
+    "exit": 0
+  }
+]

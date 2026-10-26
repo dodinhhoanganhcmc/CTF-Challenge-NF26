@@ -1,0 +1,131 @@
+VERIFICATION: larger left-aligned footer; removed learning strip
+Changed fields: footer desktop 10px -> 16px, mobile 9px -> 14px; justify-content center -> flex-start; text-align left; learning strip removed. Copyright, Poppins, theme colors, logos and gameplay unchanged.
+MODIFIED_FILE: L:\ctf-chall\evidence\footer-layout\MODIFIED_FILE.tsx
+DIFF_FILE: L:\ctf-chall\evidence\footer-layout\DIFF_FILE.patch
+VERIFICATION: L:\ctf-chall\evidence\footer-layout\VERIFICATION.txt
+ROLLBACK: L:\ctf-chall\evidence\footer-layout\ROLLBACK.sh
+Original game SHA256: e0a32fd690f8b7495a1664686b765e8277f9c1e2d14c5ae1a2b2772b9f94e1fc
+Modified game SHA256: f0ef7818cc5061edc93c82d0f6ed7ce148a7b5eb56613d03fff78c372a3f17cb
+
+BASELINE
+COMMAND: .venv\Scripts\python.exe evidence/footer-layout/check_state.py evidence/footer-layout/baseline
+INPUT: Original footer size/alignment and learning strip.
+LITERAL STDOUT:
+{"footer_size":"10px","footer_alignment":"center","learning_strip":true}
+
+LITERAL STDERR:
+
+EXIT STATUS: 0
+
+MODIFIED
+COMMAND: .venv\Scripts\python.exe evidence/footer-layout/check_state.py .
+INPUT: Footer 16px desktop/14px mobile, left aligned; learning strip removed.
+LITERAL STDOUT:
+{"footer_size":"16px","footer_alignment":"flex-start","learning_strip":false}
+
+LITERAL STDERR:
+
+EXIT STATUS: 0
+
+TYPECHECK
+COMMAND: npm run typecheck
+INPUT: Current TypeScript.
+LITERAL STDOUT:
+
+> dao-mat-ma@1.0.0 typecheck
+> tsc --noEmit
+
+
+LITERAL STDERR:
+
+EXIT STATUS: 0
+
+BUILD
+COMMAND: npm run build
+INPUT: Current production frontend.
+LITERAL STDOUT:
+
+> dao-mat-ma@1.0.0 build
+> next build
+
+▲ Next.js 16.4.3 (Turbopack)
+✓ Running next.config.ts took 30ms
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 2.4s
+  Running TypeScript ...
+  Finished TypeScript in 1760ms ...
+  Collecting page data using 5 workers ...
+  Generating static pages using 5 workers (0/3) ...
+✓ Generating static pages using 5 workers (3/3) in 306ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+└ ƒ /api/v1/[...path]
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+
+LITERAL STDERR:
+
+EXIT STATUS: 0
+
+E2E
+COMMAND: npm run test:e2e
+INPUT: Both journeys; 5 widths x 2 themes; footer size/alignment/left edge; removed copy; Poppins, logo and axe checks.
+LITERAL STDOUT:
+
+> dao-mat-ma@1.0.0 test:e2e
+> playwright test
+
+
+Running 7 tests using 1 worker
+
+  ✓  1 tests\game.spec.ts:71:5 › all learning-bench methods and input errors (7ms)
+  ✓  2 tests\game.spec.ts:118:7 › complete five-stage easy journey, reward, restart and leaderboard (4.2s)
+  ✓  3 tests\game.spec.ts:118:7 › complete five-stage hard journey, reward, restart and leaderboard (5.3s)
+  ✓  4 tests\game.spec.ts:180:5 › hints, download, journal, guide, replay and theme controls (2.9s)
+  ✓  5 tests\game.spec.ts:207:5 › proxy origin, allowlist, body limits and session isolation (186ms)
+  ✓  6 tests\game.spec.ts:218:5 › responsive light/dark, keyboard, accessibility and visual evidence (7.0s)
+  ✓  7 tests\game.spec.ts:280:5 › official logo assets are served and authorize the real reward artwork (26ms)
+
+  7 passed (23.6s)
+
+LITERAL STDERR:
+[WebServer] INFO:     Started server process [28172]
+[WebServer] INFO:     Waiting for application startup.
+[WebServer] INFO:     Application startup complete.
+[WebServer] INFO:     Uvicorn running on http://127.0.0.1:8100 (Press CTRL+C to quit)
+[WebServer] (node:47304) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+(node:50760) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+EXIT STATUS: 0
+
+ROLLBACK
+COMMAND: "C:\Program Files\Git\bin\bash.exe" evidence/footer-layout/ROLLBACK.sh L:/ctf-chall/evidence/footer-layout/rollback-copy
+INPUT: Separate copy; no runtime data touched.
+LITERAL STDOUT:
+ROLLBACK_OK restored=3 removed=0
+
+LITERAL STDERR:
+
+EXIT STATUS: 0
+
+RESTORED
+COMMAND: .venv\Scripts\python.exe evidence/footer-layout/check_state.py evidence/footer-layout/rollback-copy
+INPUT: Verify previous palette and heading are restored on the copy only.
+LITERAL STDOUT:
+{"footer_size":"10px","footer_alignment":"center","learning_strip":true}
+
+LITERAL STDERR:
+
+EXIT STATUS: 0
+
+Restored behavior/status: previous footer size/alignment and learning strip on the separate copy; all 3 original hashes restored.
+Working project retains the larger left-aligned footer and removal of the learning strip.

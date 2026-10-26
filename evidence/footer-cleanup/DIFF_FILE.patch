@@ -1,0 +1,570 @@
+--- baseline/public/README.md
++++ modified/public/README.md
+@@ -3,6 +3,6 @@
+ - `/club-logo.png`: black background, white artwork; primary supplied PNG normalized to 1024×1024.
+ - `/club-logo-light.jpg`: white background, black artwork; exact supplied alternative JPEG.
+ 
+-The `ClubLogo` component uses the light alternative in the light theme and the primary in the dark theme at the header, footer and authorized treasure screen. Both remain opaque: no crop, inversion, recoloring, background removal or circular mask. The originals remain byte-for-byte under `assets/branding/originals/`.
++The `ClubLogo` component uses the light alternative in the light theme and the primary in the dark theme at the header and authorized treasure screen. Both remain opaque: no crop, inversion, recoloring, background removal or circular mask. The originals remain byte-for-byte under `assets/branding/originals/`.
+ 
+ Rebuild and restart Next.js after changing public assets.
+--- baseline/scripts/check_palette.py
++++ modified/scripts/check_palette.py
+@@ -35,7 +35,7 @@
+         results.append({'theme': theme, 'foreground': fg, 'background': 'panel',
+                         'ratio': round(contrast(colors[fg], colors['panel']), 3), 'threshold': 3.0})
+ failed = [row for row in results if row['ratio'] < row['threshold']]
+-output = root / 'evidence/white-black-title/palette-contrast.json'
++output = root / 'evidence/footer-cleanup/palette-contrast.json'
+ output.parent.mkdir(parents=True, exist_ok=True)
+ output.write_text(json.dumps(results, indent=2), encoding='utf-8')
+ if failed:
+Binary font added: public/fonts/poppins-800.woff2; SHA256 8a09a9aa156b5c509ad0a4deae5dd744e6ad44b26efe4c769cab9a37eac884f7
+Binary font added: public/fonts/poppins-500.woff2; SHA256 e2a6df2be82048220dab39c4461e47f7637948201514d50326479664715fb6d6
+--- baseline/package-lock.json
++++ modified/package-lock.json
+@@ -8,8 +8,6 @@
+       "name": "dao-mat-ma",
+       "version": "1.0.0",
+       "dependencies": {
+-        "@fontsource-variable/bricolage-grotesque": "^5.2.8",
+-        "@fontsource-variable/plus-jakarta-sans": "^5.2.8",
+         "@phosphor-icons/react": "^2.1.10",
+         "next": "16.4.3",
+         "react": "19.3.1",
+@@ -63,24 +61,6 @@
+       "optional": true,
+       "dependencies": {
+         "tslib": "^2.4.0"
+-      }
+-    },
+-    "node_modules/@fontsource-variable/bricolage-grotesque": {
+-      "version": "5.3.0",
+-      "resolved": "https://registry.npmjs.org/@fontsource-variable/bricolage-grotesque/-/bricolage-grotesque-5.3.0.tgz",
+-      "integrity": "sha512-TLi9Q4hJjS2UvoTMRSS2nHu6c4R56lAw60NR9QYtVRCHn0XtsFpiEhNffZ8Glsoxu6wEEwLKBP8lb94J52PNBA==",
+-      "license": "OFL-1.1",
+-      "funding": {
+-        "url": "https://github.com/sponsors/ayuhito"
+-      }
+-    },
+-    "node_modules/@fontsource-variable/plus-jakarta-sans": {
+-      "version": "5.3.0",
+-      "resolved": "https://registry.npmjs.org/@fontsource-variable/plus-jakarta-sans/-/plus-jakarta-sans-5.3.0.tgz",
+-      "integrity": "sha512-/l/4r0yyWK9JzAlmA0LiYgGgmJe/Gswt4jTJEzr5QhJfwMbvJZDmYWyW0M4X7yCK69BajMVlV/Lx8g7WDc1+sw==",
+-      "license": "OFL-1.1",
+-      "funding": {
+-        "url": "https://github.com/sponsors/ayuhito"
+       }
+     },
+     "node_modules/@img/colour": {
+--- baseline/app/layout.tsx
++++ modified/app/layout.tsx
+@@ -1,6 +1,4 @@
+ import type { Metadata } from 'next';
+-import '@fontsource-variable/bricolage-grotesque';
+-import '@fontsource-variable/plus-jakarta-sans';
+ import './globals.css';
+ 
+ export const metadata: Metadata = {
+--- baseline/package.json
++++ modified/package.json
+@@ -11,21 +11,19 @@
+     "test:api": "python -m pytest backend/tests -q"
+   },
+   "dependencies": {
++    "@phosphor-icons/react": "^2.1.10",
+     "next": "16.4.3",
+     "react": "19.3.1",
+-    "react-dom": "19.3.1",
+-    "@phosphor-icons/react": "^2.1.10",
+-    "@fontsource-variable/bricolage-grotesque": "^5.2.8",
+-    "@fontsource-variable/plus-jakarta-sans": "^5.2.8"
++    "react-dom": "19.3.1"
+   },
+   "devDependencies": {
+-    "typescript": "^5.9.3",
++    "@axe-core/playwright": "^4.11.1",
++    "@playwright/test": "^1.58.2",
++    "@tailwindcss/postcss": "^4.2.1",
+     "@types/node": "^24.10.0",
+     "@types/react": "^19.2.0",
+     "@types/react-dom": "^19.2.0",
+     "tailwindcss": "^4.2.1",
+-    "@tailwindcss/postcss": "^4.2.1",
+-    "@playwright/test": "^1.58.2",
+-    "@axe-core/playwright": "^4.11.1"
++    "typescript": "^5.9.3"
+   }
+ }
+--- baseline/components/club-logo.tsx
++++ modified/components/club-logo.tsx
+@@ -1,8 +1,8 @@
+ import Image from 'next/image';
+ 
+ /** Opaque, unaltered artwork: the light/dark variants always keep their own background. */
+-export default function ClubLogo({ placement = 'header' }: { placement?: 'header' | 'footer' | 'reward' }) {
+-  const sizes = placement === 'reward' ? '(max-width: 600px) 216px, 248px' : placement === 'footer' ? '112px' : '(max-width: 600px) 68px, 88px';
++export default function ClubLogo({ placement = 'header' }: { placement?: 'header' | 'reward' }) {
++  const sizes = placement === 'reward' ? '(max-width: 600px) 216px, 248px' : '(max-width: 600px) 68px, 88px';
+   return <span className={`club-logo club-logo-${placement}`} data-testid={`club-logo-${placement}`}>
+     <Image className="club-logo-light" src="/club-logo-light.jpg?v=20261026" alt="Logo CMC Infrasec" width={1024} height={1024} sizes={sizes} loading={placement === 'header' ? 'eager' : 'lazy'} />
+     <Image className="club-logo-dark" src="/club-logo.png?v=20261026" alt="Logo CMC Infrasec" width={1024} height={1024} sizes={sizes} loading={placement === 'header' ? 'eager' : 'lazy'} />
+--- baseline/components/game.tsx
++++ modified/components/game.tsx
+@@ -186,7 +186,7 @@
+ 
+       <section className="game-shell" aria-label="Chuyến săn kho báu">
+         <div className="game-toolbar"><div className="mode-switch" role="group" aria-label="Độ khó"><button aria-pressed={mode === 'easy'} disabled={busy} onClick={() => changeMode('easy')}>Easy <span>Khởi đầu</span></button><button aria-pressed={mode === 'hard'} disabled={busy} onClick={() => changeMode('hard')}>Hard <span>Thử sức</span></button></div>
+-          <div className="player-chip">{guest ? <><span className="avatar">{guest.name.slice(0, 1).toUpperCase()}</span><span>{guest.name}</span><span className="score">{progress?.points || 0} điểm</span></> : <span><FlagIcon /> Dành cho người mới · Weight ≤ 10</span>}</div>
++          <div className="player-chip">{guest ? <><span className="avatar">{guest.name.slice(0, 1).toUpperCase()}</span><span>{guest.name}</span><span className="score">{progress?.points || 0} điểm</span><button className="icon-button replay-button" aria-label="Chuyến đi mới" title="Chuyến đi mới" onClick={() => setPanel('replay')}><ArrowCounterClockwiseIcon size={18} /></button></> : <span><FlagIcon /> Dành cho người mới</span>}</div>
+         </div>
+ 
+         <div className={`game-columns ${guest ? '' : 'awaiting-captain'}`}><section className="map-panel" aria-labelledby="map-title">
+@@ -245,7 +245,7 @@
+ 
+       <section className="below-map"><span><SparkleIcon size={22} /><strong>Học bằng cách khám phá.</strong> Mỗi màn là một kỹ năng, không phải bài kiểm tra.</span><button className="text-button" onClick={() => setPanel('guide')}>Đọc sổ tay tân binh <ArrowRightIcon /></button></section>
+     </main>
+-    <footer><p>Ai cũng có một<br /><span>lần đầu phá mã.</span></p><div className="footer-bottom"><span className="footer-organizer"><ClubLogo placement="footer" /><span className="muted">× NextFest 26</span></span><span>5 bí mật. 1 chuyến đi đáng nhớ.</span>{guest && <button className="text-button" onClick={() => setPanel('replay')}><ArrowCounterClockwiseIcon /> Chuyến đi mới</button>}</div></footer>
++    <footer><div className="footer-bottom"><span>(c) CMC Infrasec x NextFest '26</span></div></footer>
+ 
+     {panel && <Modal title={{ guide: 'Sổ tay tân binh', journal: 'Nhật ký thám hiểm', leaderboard: 'Bảng xếp hạng', replay: 'Bắt đầu chuyến đi mới?', treasure: 'Kho báu của bạn!' }[panel]} onClose={() => setPanel(null)}>
+       {panel === 'guide' && <div className="guide-content"><p className="lead">CTF là trò tìm “lá cờ” — một chuỗi ký tự bí mật ẩn trong dữ liệu.</p><ol className="guide-steps"><li><strong>Đọc manh mối.</strong> Mỗi địa điểm dạy một kỹ năng mới. Easy có công cụ và ví dụ HELLO để bạn thử trước.</li><li><strong>Tìm chuỗi <code>DAO{'{...}'}</code>.</strong> Sao chép đủ dấu ngoặc, giữ nguyên chữ hoa. Không cần cài phần mềm khi chơi Easy.</li><li><strong>Nộp flag và ghép la bàn.</strong> Đúng thì mở địa điểm mới. Sai thì thử lại; điểm không bị trừ.</li><li><strong>Đến kho báu.</strong> Giải đủ năm màn rồi đưa mã hoàn thành cho ban tổ chức để nhận sticker logo CMC Infrasec tại NextFest 26.</li></ol><div className="guide-note"><h3>Điểm & độ khó</h3><p>Weight 2 → 10 là độ khó tương đối. Điểm mỗi màn = weight × 100 − 25 × số gợi ý. Tối đa 3.000 điểm mỗi mode. BXH ưu tiên số màn → điểm → thời gian hoàn thành.</p><p>Easy và Hard lưu tiến độ riêng. Tên có thể trùng; cookie mới là định danh. Giữ cookie để tiếp tục chuyến đi.</p></div><button className="button full" onClick={() => setPanel(null)}>Đã hiểu, lên đường thôi! <ArrowRightIcon /></button></div>}
+--- baseline/docs/visual-direction.md
++++ modified/docs/visual-direction.md
+@@ -16,3 +16,11 @@
+ ## Superseding user correction / 2026-10-26
+ 
+ Pure backgrounds replace the earlier forest-tinted surfaces: paper, panel, ocean and soft tokens are #FFFFFF in light mode and #000000 in dark mode. Islands and rules use neutral grayscale. Supplied logos remain unchanged and theme-aware. The hero now reads “CMC Infrasec / Truy Tìm Kho Báu”. Warm action accents are retained for control recognition; all text and UI contrast gates are rerun on the updated tokens.
++
++## Latest footer/logo correction
++
++Logo containers have no visible border and no rounded frame. Only header and reward retain the supplied logos. The footer contains only `(c) CMC Infrasec x NextFest '26`; both the closing slogan and journey tagline are removed. The guest summary no longer shows Weight ≤ 10. Replay remains accessible beside the guest name/score.
++
++The final user-specified background tokens supersede pure white/black: light #FEFEFE, dark #020202, including page, panels, map and logo plates.
++
++Latest typography correction: all text uses self-hosted Poppins, including headings, labels, controls and puzzle/code content. Previous display/body/monospace families are superseded. Font loading and Vietnamese glyph coverage are checked in-browser.
+Binary font added: public/fonts/poppins-700.woff2; SHA256 954fbcb9b6a5b01efa3e32043c16aba05406f5139d72d8ea71a2e2b3de1c105e
+--- baseline/public/fonts/OFL.txt
++++ modified/public/fonts/OFL.txt
+@@ -0,0 +1,96 @@
++Vietnamese adaptation: Vntype.Com & FontZin.Com (https://fontzin.com/poppins-viet-hoa/)
++Original and adaptation font metadata identify SIL Open Font License 1.1.
++
++Copyright 2020 The Poppins Project Authors (https://github.com/itfoundry/Poppins) Poppins-ThinItalic.ttf: Copyright 2020 The Poppins Project Authors (https://github.com/itfoundry/Poppins) Poppins-ExtraLight.ttf: Copyright 2020 The Poppins Project Authors (https://github.com/itfoundry/Poppins) Poppins-ExtraLightItalic.ttf: Copyright 2020 The Poppins Project Authors (https://github.com/itfoundry/Poppins) Poppins-Light.ttf: Copyright 2020 The Poppins Project Authors (https://github.com/itfoundry/Poppins) Poppins-LightItalic.ttf: Copyright 2020 The Poppins Project Authors (https://github.com/itfoundry/Poppins) Poppins-Regular.ttf: Copyright 2020 The Poppins Project Authors (https://github.com/itfoundry/Poppins) Poppins-Italic.ttf: Copyright 2020 The Poppins Project Authors (https://github.com/itfoundry/Poppins) Poppins-Medium.ttf: Copyright 2020 The Poppins Project Authors (https://github.com/itfoundry/Poppins) Poppins-MediumItalic.ttf: Copyright 2020 The Poppins Project Authors (https://github.com/itfoundry/Poppins) Poppins-SemiBold.ttf: Copyright 2020 The Poppins Project Authors (https://github.com/itfoundry/Poppins) Poppins-SemiBoldItalic.ttf: Copyright 2020 The Poppins Project Authors (https://github.com/itfoundry/Poppins) Poppins-Bold.ttf: Copyright 2020 The Poppins Project Authors (https://github.com/itfoundry/Poppins) Poppins-BoldItalic.ttf: Copyright 2020 The Poppins Project Authors (https://github.com/itfoundry/Poppins) Poppins-ExtraBold.ttf: Copyright 2020 The Poppins Project Authors (https://github.com/itfoundry/Poppins) Poppins-ExtraBoldItalic.ttf: Copyright 2020 The Poppins Project Authors (https://github.com/itfoundry/Poppins) Poppins-Black.ttf: Copyright 2020 The Poppins Project Authors (https://github.com/itfoundry/Poppins) Poppins-BlackItalic.ttf: Copyright 2020 The Poppins Project Authors (https://github.com/itfoundry/Poppins)
++
++This Font Software is licensed under the SIL Open Font License, Version 1.1.
++This license is copied below, and is also available with a FAQ at:
++http://scripts.sil.org/OFL
++
++
++-----------------------------------------------------------
++SIL OPEN FONT LICENSE Version 1.1 - 26 February 2007
++-----------------------------------------------------------
++
++PREAMBLE
++The goals of the Open Font License (OFL) are to stimulate worldwide
++development of collaborative font projects, to support the font creation
++efforts of academic and linguistic communities, and to provide a free and
++open framework in which fonts may be shared and improved in partnership
++with others.
++
++The OFL allows the licensed fonts to be used, studied, modified and
++redistributed freely as long as they are not sold by themselves. The
++fonts, including any derivative works, can be bundled, embedded,
++redistributed and/or sold with any software provided that any reserved
++names are not used by derivative works. The fonts and derivatives,
++however, cannot be released under any other type of license. The
++requirement for fonts to remain under this license does not apply
++to any document created using the fonts or their derivatives.
++
++DEFINITIONS
++"Font Software" refers to the set of files released by the Copyright
++Holder(s) under this license and clearly marked as such. This may
++include source files, build scripts and documentation.
++
++"Reserved Font Name" refers to any names specified as such after the
++copyright statement(s).
++
++"Original Version" refers to the collection of Font Software components as
++distributed by the Copyright Holder(s).
++
++"Modified Version" refers to any derivative made by adding to, deleting,
++or substituting -- in part or in whole -- any of the components of the
++Original Version, by changing formats or by porting the Font Software to a
++new environment.
++
++"Author" refers to any designer, engineer, programmer, technical
++writer or other person who contributed to the Font Software.
++
++PERMISSION & CONDITIONS
++Permission is hereby granted, free of charge, to any person obtaining
++a copy of the Font Software, to use, study, copy, merge, embed, modify,
++redistribute, and sell modified and unmodified copies of the Font
++Software, subject to the following conditions:
++
++1) Neither the Font Software nor any of its individual components,
++in Original or Modified Versions, may be sold by itself.
++
++2) Original or Modified Versions of the Font Software may be bundled,
++redistributed and/or sold with any software, provided that each copy
++contains the above copyright notice and this license. These can be
++included either as stand-alone text files, human-readable headers or
++in the appropriate machine-readable metadata fields within text or
++binary files as long as those fields can be easily viewed by the user.
++
++3) No Modified Version of the Font Software may use the Reserved Font
++Name(s) unless explicit written permission is granted by the corresponding
++Copyright Holder. This restriction only applies to the primary font name as
++presented to the users.
++
++4) The name(s) of the Copyright Holder(s) or the Author(s) of the Font
++Software shall not be used to promote, endorse or advertise any
++Modified Version, except to acknowledge the contribution(s) of the
++Copyright Holder(s) and the Author(s) or with their explicit written
++permission.
++
++5) The Font Software, modified or unmodified, in part or in whole,
++must be distributed entirely under this license, and must not be
++distributed under any other license. The requirement for fonts to
++remain under this license does not apply to any document created
++using the Font Software.
++
++TERMINATION
++This license becomes null and void if any of the above conditions are
++not met.
++
++DISCLAIMER
++THE FONT SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
++EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTIES OF
++MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT
++OF COPYRIGHT, PATENT, TRADEMARK, OR OTHER RIGHT. IN NO EVENT SHALL THE
++COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
++INCLUDING ANY GENERAL, SPECIAL, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL
++DAMAGES, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
++FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM
++OTHER DEALINGS IN THE FONT SOFTWARE.
+--- baseline/README.md
++++ modified/README.md
+@@ -44,9 +44,9 @@
+ - `club-primary-original.png`: bản chính, nền đen/chữ trắng.
+ - `club-alternative-original.jpg`: bản thay thế, nền trắng/chữ đen.
+ 
+-Bản dùng trên web là `public/club-logo.png` (PNG 1024×1024, thu nhỏ bản chính) và `public/club-logo-light.jpg` (bản JPEG thay thế nguyên gốc). Header, footer và màn nhận thưởng dùng bản trắng ở giao diện sáng, bản đen ở giao diện tối. Giữ toàn bộ bố cục vuông, không cắt, không đảo màu, không tách nền; Next.js tự tối ưu kích thước tải về.
++Bản dùng trên web là `public/club-logo.png` (PNG 1024×1024, thu nhỏ bản chính) và `public/club-logo-light.jpg` (bản JPEG thay thế nguyên gốc). Header và màn nhận thưởng dùng bản trắng ở giao diện sáng, bản đen ở giao diện tối. Giữ toàn bộ bố cục vuông, không cắt, không đảo màu, không tách nền; Next.js tự tối ưu kích thước tải về.
+ 
+-Theo cập nhật mới nhất: nền trang, panel và bản đồ trắng hoàn toàn #FFFFFF ở theme sáng, đen hoàn toàn #000000 ở theme tối để hòa với nền logo. Đảo và đường viền dùng xám trung tính; CTA giữ màu đất nung/cam đào để dễ nhận biết. Tiêu đề chính là “CMC Infrasec — Truy Tìm Kho Báu”. Kiểm tra contrast bằng `.\.venv\Scripts\python.exe scripts/check_palette.py`; kết quả chi tiết trong `evidence/white-black-title/palette-contrast.json`.
++Theo cập nhật mới nhất: nền trang, panel và bản đồ trắng #FEFEFE ở theme sáng, đen #020202 ở theme tối để hòa với nền logo. Đảo và đường viền dùng xám trung tính; CTA giữ màu đất nung/cam đào để dễ nhận biết. Tiêu đề chính là “CMC Infrasec — Truy Tìm Kho Báu”. Kiểm tra contrast bằng `.\.venv\Scripts\python.exe scripts/check_palette.py`; kết quả chi tiết trong `evidence/footer-cleanup/palette-contrast.json`.
+ 
+ Sau khi thay ảnh trong public, chạy build và khởi động lại:
+ 
+@@ -87,3 +87,9 @@
+ ## Hồ sơ bàn giao
+ 
+ `docs/session-review.md`, `docs/security-review.md`, `docs/openapi.json`, `evidence/logo-update/VERIFICATION.txt`, `evidence/logo-update/DIFF_FILE.patch`, `evidence/logo-update/ROLLBACK.sh`. Bản gốc cùng hash nằm trong `evidence/baseline/` và `evidence/original-hashes.json`. Rollback chỉ khôi phục mã nguồn, không xóa SQLite, logo được gửi sau hay dữ liệu người chơi.
++
++Footer hiện chỉ ghi `(c) CMC Infrasec x NextFest '26`. Logo chỉ có tại header/màn thưởng và không có viền. Nút chuyến đi mới ở cạnh tên/điểm guest. Nhãn Weight ≤ 10 đã bỏ khỏi giao diện; weight của bài chơi trong dữ liệu không thay đổi.
++
++Toàn bộ giao diện dùng Poppins (400/500/600/700/800), tải font tại máy chủ ứng dụng, có glyph tiếng Việt; không gọi Google Fonts bên ngoài.
++
++Bản Poppins Việt hóa (Vntype.Com & FontZin.Com) được tự host dưới dạng WOFF2 tại `public/fonts/`; SIL OFL và nguồn/commit/hash được giữ trong `assets/fonts/poppins-vietnamese/`. Các ký tự tiếng Việt được kiểm tra trực tiếp trong cmap font và bằng font thực tế mà trình duyệt render, không chỉ CSS font-family.
+--- baseline/CONTEXT.md
++++ modified/CONTEXT.md
+@@ -8,5 +8,8 @@
+ 
+ - Organizer: CMC Infrasec; event: NextFest 26.
+ - Reward: physical club-logo sticker; a stable completion code is issued only after five solves.
+-- Official logos installed: public/club-logo.png (black primary) and public/club-logo-light.jpg (white alternative). Header/footer/reward use the matching opaque variant for the theme; preserve original artwork, aspect ratio and background. Originals are retained under assets/branding/originals/.
++- Official logos installed: public/club-logo.png (black primary) and public/club-logo-light.jpg (white alternative). Header/reward use the matching opaque variant for the theme; preserve original artwork, aspect ratio and background. Originals are retained under assets/branding/originals/.
+ - Leaderboard: public guest name; order by solved count, points, completion duration.
++
++- Typography: Poppins throughout the site, including controls and puzzle payloads; self-hosted Vietnamese subsets.
++- Footer: text-only `(c) CMC Infrasec x NextFest '26`; replay is beside the guest summary.
+--- baseline/app/globals.css
++++ modified/app/globals.css
+@@ -1,18 +1,25 @@
+ @import 'tailwindcss';
+ 
++/* Poppins Vietnamese adaptation; attribution and SIL OFL are in public/fonts/OFL.txt. */
++@font-face { font-family:'Poppins'; font-style:normal; font-weight:400; font-display:swap; src:url('/fonts/poppins-400.woff2') format('woff2'); }
++@font-face { font-family:'Poppins'; font-style:normal; font-weight:500; font-display:swap; src:url('/fonts/poppins-500.woff2') format('woff2'); }
++@font-face { font-family:'Poppins'; font-style:normal; font-weight:600; font-display:swap; src:url('/fonts/poppins-600.woff2') format('woff2'); }
++@font-face { font-family:'Poppins'; font-style:normal; font-weight:700; font-display:swap; src:url('/fonts/poppins-700.woff2') format('woff2'); }
++@font-face { font-family:'Poppins'; font-style:normal; font-weight:800; font-display:swap; src:url('/fonts/poppins-800.woff2') format('woff2'); }
++
+ @theme inline {
+-  --font-sans: 'Plus Jakarta Sans Variable', sans-serif;
+-  --font-display: 'Bricolage Grotesque Variable', sans-serif;
++  --font-sans: 'Poppins', sans-serif;
++  --font-display: 'Poppins', sans-serif;
+   --color-paper: var(--paper);
+   --color-ink: var(--ink);
+   --color-coral: var(--coral);
+   --color-ocean: var(--ocean);
+ }
+-:root { --paper:#ffffff; --panel:#ffffff; --ink:#171717; --muted:#555555; --coral:#ad3b25; --coral-bright:#ed7854; --ocean:#ffffff; --land:#ececec; --line:#d5d5d5; --control-border:#767676; --soft:#ffffff; --focus:#126c8a; --success:#246644; --error:#a42f25; --shadow:0 22px 60px #0000000d; color-scheme:light; }
+-:root[data-theme='dark'] { --paper:#000000; --panel:#000000; --ink:#f5f5f5; --muted:#bdbdbd; --coral:#ffb08f; --coral-bright:#f39e78; --ocean:#000000; --land:#202020; --line:#404040; --control-border:#888888; --soft:#000000; --focus:#96dcec; --success:#a5e6bc; --error:#ffb4a8; --shadow:0 22px 60px #00000022; color-scheme:dark; }
++:root { --paper:#fefefe; --panel:#fefefe; --ink:#171717; --muted:#555555; --coral:#ad3b25; --coral-bright:#ed7854; --ocean:#fefefe; --land:#ececec; --line:#d5d5d5; --control-border:#767676; --soft:#fefefe; --focus:#126c8a; --success:#246644; --error:#a42f25; --shadow:0 22px 60px #0000000d; color-scheme:light; }
++:root[data-theme='dark'] { --paper:#020202; --panel:#020202; --ink:#f5f5f5; --muted:#bdbdbd; --coral:#ffb08f; --coral-bright:#f39e78; --ocean:#020202; --land:#202020; --line:#404040; --control-border:#888888; --soft:#020202; --focus:#96dcec; --success:#a5e6bc; --error:#ffb4a8; --shadow:0 22px 60px #00000022; color-scheme:dark; }
+ * { box-sizing:border-box; }
+ html { scroll-behavior:smooth; }
+-body { margin:0; background:var(--paper); color:var(--ink); font:14px/1.65 'Plus Jakarta Sans Variable',sans-serif; }
++body { margin:0; background:var(--paper); color:var(--ink); font:14px/1.65 'Poppins',sans-serif; }
+ button,input,textarea,select { font:inherit; }
+ button,a,input,textarea,select,summary { -webkit-tap-highlight-color:transparent; }
+ button { cursor:pointer; color:inherit; }
+@@ -24,12 +31,12 @@
+ button:disabled { opacity:.6; }
+ ::selection { background:#ed785455; }
+ h1,h2,h3,p { margin:0; }
+-h1,h2,h3 { font-family:'Bricolage Grotesque Variable',sans-serif; font-weight:650; }
++h1,h2,h3 { font-family:'Poppins',sans-serif; font-weight:650; }
+ svg { flex-shrink:0; }
+ .site-header { min-height:89px; display:flex; align-items:center; gap:28px; padding:18px max(32px,calc((100vw - 1400px)/2)); border-bottom:1.5px solid var(--ink); }
+-.brand { display:flex; align-items:center; gap:10px; text-decoration:none; font-family:'Bricolage Grotesque Variable',sans-serif; font-size:21px; font-weight:800; line-height:1.1; letter-spacing:-.7px; }
+-
+-.brand-sub { font:600 9px/1.8 'Plus Jakarta Sans Variable',sans-serif; display:block; letter-spacing:1.1px; margin-top:3px; }
++.brand { display:flex; align-items:center; gap:10px; text-decoration:none; font-family:'Poppins',sans-serif; font-size:21px; font-weight:800; line-height:1.1; letter-spacing:-.7px; }
++
++.brand-sub { font:600 9px/1.8 'Poppins',sans-serif; display:block; letter-spacing:1.1px; margin-top:3px; }
+ .site-header nav { display:flex; margin-left:auto; gap:27px; }
+ .site-header nav button { display:flex; gap:7px; align-items:center; font-weight:600; font-size:12px; padding:8px 0; }
+ .site-header nav svg { width:17px; height:17px; }
+@@ -46,7 +53,7 @@
+ .intro-copy { max-width:500px; color:var(--muted); font-size:13px; line-height:1.9; }
+ .expedition-note { border-left:1px solid var(--line); padding:10px 15px 10px 38px; min-width:310px; display:grid; justify-items:start; gap:14px; transform:rotate(-3deg); }
+ .expedition-note > svg { color:var(--coral); }
+-.expedition-note p { font-family:'Bricolage Grotesque Variable',sans-serif; font-size:23px; line-height:1.25; }
++.expedition-note p { font-family:'Poppins',sans-serif; font-size:23px; line-height:1.25; }
+ .expedition-note .eyebrow { font-size:8px; }
+ .note-bottom { font-size:10px; display:flex; align-items:center; gap:11px; color:var(--muted); }
+ .game-shell { border:1.5px solid var(--ink); border-radius:14px; overflow:hidden; background:var(--panel); box-shadow:var(--shadow); }
+@@ -63,7 +70,7 @@
+ .map-panel { background:var(--ocean); min-width:0; display:flex; flex-direction:column; }
+ .map-top { display:flex; align-items:center; justify-content:space-between; gap:15px; padding:28px 29px 0; }
+ .map-top h2 { font-size:25px; line-height:1.3; margin-top:5px; letter-spacing:-.8px; }
+-.map-coordinate { color:var(--muted); font:8px/1.9 ui-monospace,monospace; text-align:right; }
++.map-coordinate { color:var(--muted); font:8px/1.9 'Poppins',sans-serif; text-align:right; }
+ .island-map { position:relative; min-height:400px; flex:1; overflow:hidden; }
+ .map-art { position:absolute; width:100%; height:100%; inset:0; }
+ .land { fill:var(--land); stroke:var(--panel); stroke-width:7px; stroke-linejoin:round; }
+@@ -79,17 +86,17 @@
+ .map-node.active .destination-icon,.map-node:not(:disabled):hover .destination-icon { color:var(--coral); transform:translateY(-3px); transition:transform .2s; }
+ .map-node.done .node-number { background:var(--ink); color:var(--paper); }
+ .map-node.locked { opacity:.57; }
+-.map-compass { position:absolute; right:26px; bottom:17px; display:grid; justify-items:center; color:var(--muted); font:9px ui-monospace,monospace; }
++.map-compass { position:absolute; right:26px; bottom:17px; display:grid; justify-items:center; color:var(--muted); font:9px 'Poppins',sans-serif; }
+ .map-caption { position:absolute; left:29px; bottom:25px; color:var(--muted); font-size:9px; font-style:italic; }
+ .fragment-bar { margin:0 25px; padding:18px 0; border-top:1px solid color-mix(in srgb,var(--ink) 18%,transparent); display:flex; justify-content:space-between; gap:10px; align-items:center; }
+ .fragment-bar .eyebrow { font-size:8px; letter-spacing:1.1px; }
+ .fragment-bar p { font-size:12px; font-weight:650; margin-top:3px; }
+ .fragments { display:flex; gap:6px; }
+-.fragments span { width:28px; height:31px; display:grid; place-items:center; border:1px dashed var(--muted); border-radius:4px; font:10px ui-monospace,monospace; color:var(--muted); }
++.fragments span { width:28px; height:31px; display:grid; place-items:center; border:1px dashed var(--muted); border-radius:4px; font:10px 'Poppins',sans-serif; color:var(--muted); }
+ .fragments .earned { background:var(--ink); color:var(--paper); border-style:solid; }
+ .treasure-strip { display:flex; align-items:center; gap:13px; width:100%; text-align:left; padding:20px 25px; border-top:1px solid var(--line); background:var(--soft); opacity:1!important; }
+ .treasure-strip > span { flex:1; }
+-.treasure-strip strong { display:block; font:600 16px 'Bricolage Grotesque Variable',sans-serif; }
++.treasure-strip strong { display:block; font:600 16px 'Poppins',sans-serif; }
+ .treasure-strip small { display:block; font-size:9px; color:var(--muted); margin-top:4px; }
+ .treasure-strip.unlocked { background:var(--ink); color:var(--paper); }
+ .treasure-strip.unlocked small { color:var(--paper); opacity:.8; }
+@@ -106,13 +113,13 @@
+ label { display:block; font-size:11px; font-weight:650; margin-bottom:7px; }
+ input,textarea,select { width:100%; min-width:0; border:1px solid var(--control-border); background:var(--panel); color:var(--ink); border-radius:6px; padding:11px 12px; outline:none; }
+ input::placeholder,textarea::placeholder { color:var(--muted); opacity:.85; }
+-textarea { resize:vertical; font:11px/1.85 ui-monospace,monospace; }
++textarea { resize:vertical; font:11px/1.85 'Poppins',sans-serif; }
+ .clue-heading { display:flex; align-items:center; justify-content:space-between; margin-bottom:2px; }
+ .clue-heading label { font-size:8px; letter-spacing:1.2px; margin:0; }
+ .clue-data { background:var(--paper); font-size:11px; word-break:break-all; }
+ .artifact-link { display:inline-flex; align-items:center; gap:6px; font-size:10px; font-weight:600; text-underline-offset:4px; margin:7px 0 15px; }
+ .flag-form { margin-top:22px; }
+-.flag-form input { font:12px/1.6 ui-monospace,monospace; }
++.flag-form input { font:12px/1.6 'Poppins',sans-serif; }
+ .button { display:inline-flex; align-items:center; justify-content:center; gap:12px; padding:12px 18px; border:1px solid var(--coral); border-radius:6px; background:var(--coral); color:var(--panel); font-size:12px; font-weight:700; line-height:1.5; min-height:44px; }
+ :root[data-theme='dark'] .button:not(.secondary) { color:#171717; }
+ .button:hover:not(:disabled) { filter:brightness(.93); transform:translateY(-1px); }
+@@ -140,7 +147,7 @@
+ .bench-body label { margin:11px 0 5px; font-size:10px; }
+ .bench-body select,.bench-body input { font-size:11px; padding:8px; }
+ .decoder-result { margin-top:12px; padding-top:12px; border-top:1px solid var(--line); }
+-pre { white-space:pre-wrap; word-break:break-word; font:11px/1.9 ui-monospace,monospace; }
++pre { white-space:pre-wrap; word-break:break-word; font:11px/1.9 'Poppins',sans-serif; }
+ .small { font-size:11px; color:var(--muted); }
+ .muted { color:var(--muted); }
+ .error { background:color-mix(in srgb,var(--error) 8%,var(--panel)); border:1px solid color-mix(in srgb,var(--error) 35%,var(--panel)); color:var(--error); border-radius:6px; padding:12px; font-size:11px; margin-top:13px; overflow-wrap:anywhere; }
+@@ -164,10 +171,10 @@
+ .below-map { display:flex; align-items:center; justify-content:space-between; gap:24px; padding:23px 0; border-bottom:1px solid var(--line); color:var(--muted); font-size:10px; }
+ .below-map > span { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+ .below-map strong { font-weight:650; color:var(--ink); }
+-footer { padding-top:49px; padding-bottom:25px; }
+-footer > p { font-family:'Bricolage Grotesque Variable',sans-serif; font-size:43px; line-height:1.08; letter-spacing:-1.5px; }
+-footer > p span { color:var(--muted); }
+-.footer-bottom { display:flex; align-items:center; justify-content:space-between; gap:20px; border-top:1px solid var(--line); margin-top:30px; padding-top:19px; font-size:10px; }
++footer { padding-top:0; padding-bottom:25px; }
++
++
++.footer-bottom { display:flex; align-items:center; justify-content:center; gap:20px; border-top:1px solid var(--line); margin-top:30px; padding-top:19px; font-size:10px; }
+ .footer-bottom > span:first-child { font-weight:750; }
+ .footer-bottom > span:nth-child(2) { color:var(--muted); }
+ .modal { position:fixed; inset:0; margin:auto; width:min(650px,calc(100% - 32px)); max-height:calc(100dvh - 48px); background:var(--panel); color:var(--ink); padding:28px; border:1.5px solid var(--ink); border-radius:12px; box-shadow:0 30px 120px #0003; overflow-y:auto; }
+@@ -198,7 +205,7 @@
+ .reward h3 { font-size:31px; line-height:1.15; margin:17px 0; }
+ .reward p { margin:12px 0; }
+ .reward-code { background:var(--soft); padding:19px; border:1px dashed var(--ink); border-radius:6px; margin:23px 0; }
+-.reward-code strong { display:block; font:700 clamp(16px,4vw,23px)/1.7 ui-monospace,monospace; overflow-wrap:anywhere; margin-top:5px; }
++.reward-code strong { display:block; font:700 clamp(16px,4vw,23px)/1.7 'Poppins',sans-serif; overflow-wrap:anywhere; margin-top:5px; }
+ .loading-line { display:flex; align-items:center; justify-content:center; gap:10px; padding:25px; }
+ .spin { animation:spin 1.5s linear infinite; }
+ @keyframes spin { to { transform:rotate(360deg); } }
+@@ -209,24 +216,22 @@
+ @media(min-width:1500px) { .site-header { padding-left:calc((100vw - 1336px)/2); padding-right:calc((100vw - 1336px)/2); } }
+ @media(max-width:1100px) { .site-header nav { gap:15px; } .expedition-note { min-width:250px; padding-left:25px; } .game-columns { grid-template-columns:minmax(0,1.3fr) minmax(330px,1fr); } .map-node { min-width:78px; } .node-name { font-size:8px; } .node-weight { font-size:7px; } .map-coordinate { display:none; } .mission-panel { padding:23px; } .game-toolbar { padding:13px 20px; } }
+ @media(max-width:900px) { .site-header { padding:16px 24px; gap:16px; } .brand { font-size:18px; } .site-header nav { gap:18px; } .site-header nav button span { display:none; } .site-header nav svg { width:21px; height:21px; } main,footer { padding-left:24px; padding-right:24px; } .intro { padding:40px 0 30px; gap:35px; } .intro h1 { font-size:58px; } .expedition-note { min-width:210px; padding-left:25px; } .expedition-note p { font-size:20px; } .expedition-note .eyebrow { font-size:7px; letter-spacing:1px; } .game-columns { grid-template-columns:1fr; } .mission-panel { border-left:0; border-top:1px solid var(--line); padding:28px; } .map-top { padding-top:24px; } .island-map { min-height:360px; } .node-name { font-size:10px; } .node-weight { font-size:8px; } .mission-panel h2 { font-size:34px; } .mission-story,.objective p { font-size:13px; } .onboarding { max-width:420px; margin:auto; padding:15px 0; } .onboarding h2 { font-size:38px; } .onboarding .welcome-icon { margin-top:24px; } .below-map { align-items:flex-start; } .below-map > span { max-width:430px; } .mission-panel .eyebrow { font-size:10px; } .mission-panel .category { font-size:10px; } .clue-heading label { font-size:9px; } .flag-form input { font-size:14px; } .button { font-size:13px; } .bench summary { font-size:13px; } .bench summary .small { font-size:10px; } }
+-@media(max-width:600px) { body { font-size:13px; } .site-header { min-height:74px; padding:13px 16px; gap:12px; } .brand { font-size:15px; gap:7px; letter-spacing:-.4px; } .brand-sub { font-size:6.5px; letter-spacing:.6px; } .site-header nav { gap:6px; } .site-header nav button { width:32px; height:36px; padding:4px; justify-content:center; } .site-header nav svg { width:19px; height:19px; } .theme-switch { width:30px; height:30px; } main,footer { padding-left:16px; padding-right:16px; } .intro { padding:31px 0 27px; } .intro .eyebrow { font-size:7px; letter-spacing:1.1px; } .intro h1 { font-size:49px; letter-spacing:-2.4px; margin:16px 0; } .intro-copy { font-size:12px; line-height:1.85; max-width:350px; } .expedition-note { display:none; } .game-shell { border-radius:10px; } .game-toolbar { flex-wrap:wrap; padding:12px 14px; gap:10px; } .mode-switch { flex:1; } .mode-switch button { flex:1; justify-content:center; padding:7px 8px; font-size:11px; gap:6px; } .mode-switch button span { font-size:9px; } .player-chip { width:100%; justify-content:space-between; } .player-chip .score { margin-left:auto; } .player-chip > span { font-size:9px; } .map-top { padding:20px 18px 15px; } .map-top h2 { font-size:24px; } .map-top .eyebrow { font-size:8px; } .island-map { display:none; } .mobile-route { display:flex; flex-direction:column; list-style:none; padding:0 18px; margin:0 0 15px; gap:7px; } .mobile-route button { width:100%; display:flex; align-items:center; text-align:left; gap:12px; padding:12px 13px; border:1px solid var(--line); border-radius:7px; background:color-mix(in srgb,var(--panel) 65%,var(--ocean)); } .mobile-route button.selected { border-color:var(--coral); background:var(--panel); box-shadow:inset 3px 0 0 var(--coral); } .mobile-route button > span { flex:1; font-size:12px; font-weight:650; } .mobile-route small { display:block; font:8px/1.6 ui-monospace,monospace; color:var(--muted); margin-bottom:2px; } .mobile-route button > svg:last-child { width:17px; } .fragment-bar { margin:0 18px; padding:15px 0; } .fragment-bar p { font-size:10px; } .fragments { gap:4px; } .fragments span { width:23px; height:27px; font-size:8px; } .fragments svg { width:13px; } .treasure-strip { padding:16px 18px; gap:10px; } .treasure-strip strong { font-size:14px; line-height:1.4; } .treasure-strip small { font-size:8px; } .treasure-strip > svg:first-child { width:24px; } .treasure-strip > svg:last-child { width:17px; } .mission-panel { padding:23px 18px; } .mission-panel h2 { font-size:29px; } .mission-story { font-size:12px; } .mission-top .eyebrow { font-size:8px; } .mission-top .category { font-size:8px; } .objective p { font-size:11px; } .objective { padding:10px; } .onboarding h2 { font-size:36px; } .bench summary { font-size:11px; } .bench summary .small { font-size:8px; } .hints small { font-size:9px; } .below-map { flex-direction:column; gap:12px; padding:21px 0; } .below-map > span { align-items:flex-start; font-size:10px; } .below-map > span > svg { width:18px; } footer { padding-top:33px; } footer > p { font-size:36px; } .footer-bottom { flex-wrap:wrap; gap:11px; font-size:9px; } .footer-bottom > span:nth-child(2) { width:100%; order:3; } .modal { padding:20px; width:calc(100% - 24px); max-height:calc(100dvh - 24px); } .modal-heading h2 { font-size:24px; } .modal p { font-size:11px; } .modal .lead { font-size:14px; } .guide-steps li { font-size:11px; } .reward h3 { font-size:27px; } .reward-illustration { width:120px; height:120px; } }
++@media(max-width:600px) { body { font-size:13px; } .site-header { min-height:74px; padding:13px 16px; gap:12px; } .brand { font-size:15px; gap:7px; letter-spacing:-.4px; } .brand-sub { font-size:6.5px; letter-spacing:.6px; } .site-header nav { gap:6px; } .site-header nav button { width:32px; height:36px; padding:4px; justify-content:center; } .site-header nav svg { width:19px; height:19px; } .theme-switch { width:30px; height:30px; } main,footer { padding-left:16px; padding-right:16px; } .intro { padding:31px 0 27px; } .intro .eyebrow { font-size:7px; letter-spacing:1.1px; } .intro h1 { font-size:49px; letter-spacing:-2.4px; margin:16px 0; } .intro-copy { font-size:12px; line-height:1.85; max-width:350px; } .expedition-note { display:none; } .game-shell { border-radius:10px; } .game-toolbar { flex-wrap:wrap; padding:12px 14px; gap:10px; } .mode-switch { flex:1; } .mode-switch button { flex:1; justify-content:center; padding:7px 8px; font-size:11px; gap:6px; } .mode-switch button span { font-size:9px; } .player-chip { width:100%; justify-content:space-between; } .player-chip .score { margin-left:auto; } .player-chip > span { font-size:9px; } .map-top { padding:20px 18px 15px; } .map-top h2 { font-size:24px; } .map-top .eyebrow { font-size:8px; } .island-map { display:none; } .mobile-route { display:flex; flex-direction:column; list-style:none; padding:0 18px; margin:0 0 15px; gap:7px; } .mobile-route button { width:100%; display:flex; align-items:center; text-align:left; gap:12px; padding:12px 13px; border:1px solid var(--line); border-radius:7px; background:color-mix(in srgb,var(--panel) 65%,var(--ocean)); } .mobile-route button.selected { border-color:var(--coral); background:var(--panel); box-shadow:inset 3px 0 0 var(--coral); } .mobile-route button > span { flex:1; font-size:12px; font-weight:650; } .mobile-route small { display:block; font:8px/1.6 'Poppins',sans-serif; color:var(--muted); margin-bottom:2px; } .mobile-route button > svg:last-child { width:17px; } .fragment-bar { margin:0 18px; padding:15px 0; } .fragment-bar p { font-size:10px; } .fragments { gap:4px; } .fragments span { width:23px; height:27px; font-size:8px; } .fragments svg { width:13px; } .treasure-strip { padding:16px 18px; gap:10px; } .treasure-strip strong { font-size:14px; line-height:1.4; } .treasure-strip small { font-size:8px; } .treasure-strip > svg:first-child { width:24px; } .treasure-strip > svg:last-child { width:17px; } .mission-panel { padding:23px 18px; } .mission-panel h2 { font-size:29px; } .mission-story { font-size:12px; } .mission-top .eyebrow { font-size:8px; } .mission-top .category { font-size:8px; } .objective p { font-size:11px; } .objective { padding:10px; } .onboarding h2 { font-size:36px; } .bench summary { font-size:11px; } .bench summary .small { font-size:8px; } .hints small { font-size:9px; } .below-map { flex-direction:column; gap:12px; padding:21px 0; } .below-map > span { align-items:flex-start; font-size:10px; } .below-map > span > svg { width:18px; } footer { padding-top:0; } .footer-bottom { flex-wrap:wrap; gap:11px; font-size:9px; } .footer-bottom > span:nth-child(2) { width:100%; order:3; } .modal { padding:20px; width:calc(100% - 24px); max-height:calc(100dvh - 24px); } .modal-heading h2 { font-size:24px; } .modal p { font-size:11px; } .modal .lead { font-size:14px; } .guide-steps li { font-size:11px; } .reward h3 { font-size:27px; } .reward-illustration { width:120px; height:120px; } }
+ @media(max-width:360px) { .site-header { gap:4px; padding-left:12px; padding-right:12px; } .brand { font-size:13px; } .brand-sub { font-size:5.5px; } .site-header nav { gap:1px; } .site-header nav button { width:27px; } .theme-switch { width:27px; } .intro h1 { font-size:43px; } .mode-switch button span { display:none; } .fragment-bar { flex-wrap:wrap; } .mission-panel { padding:21px 14px; } .mission-top { flex-wrap:wrap; } }
+ @media(prefers-reduced-motion:reduce) { *,*::before,*::after { animation:none!important; transition:none!important; scroll-behavior:auto!important; } }
+ 
+ @media(max-width:900px) { .awaiting-captain .mission-panel { order:-1; border-top:0; border-bottom:1px solid var(--line); } }
+ 
+ /* Official opaque artwork: no inversion, blend modes, transparency extraction or cropping. */
+-.club-logo { display:inline-block; flex-shrink:0; width:88px; height:88px; overflow:hidden; border:1px solid var(--line); border-radius:5px; background:#fff; line-height:0; }
++.club-logo { display:inline-block; flex-shrink:0; width:88px; height:88px; overflow:hidden; border:0; border-radius:0; background:#fefefe; line-height:0; }
+ .club-logo img { width:100%; height:100%; object-fit:contain; filter:none; mix-blend-mode:normal; }
+ .club-logo .club-logo-light { display:block; }
+ .club-logo .club-logo-dark { display:none; }
+-:root[data-theme='dark'] .club-logo { background:#000000; }
++:root[data-theme='dark'] .club-logo { background:#020202; }
+ :root[data-theme='dark'] .club-logo .club-logo-light { display:none; }
+ :root[data-theme='dark'] .club-logo .club-logo-dark { display:block; }
+ .site-header { min-height:113px; padding-top:12px; padding-bottom:12px; }
+ .brand { gap:16px; }
+-.footer-organizer { display:flex; align-items:center; gap:18px; }
+-.club-logo-footer { width:112px; height:112px; }
+ .reward-illustration:has(.club-logo) { width:248px; height:248px; border:0; border-radius:0; background:none; transform:none; margin-bottom:22px; }
+ .club-logo-reward { width:100%; height:100%; }
+ .reward-illustration .club-logo img { width:100%; height:100%; object-fit:contain; }
+@@ -239,8 +244,7 @@
+  .site-header nav { gap:4px; }
+  .site-header nav button { width:30px; }
+  .reward-illustration:has(.club-logo) { width:216px; height:216px; }
+- .footer-organizer { gap:12px; }
+-}
++ }
+ @media(max-width:460px) {
+  .site-header .brand { flex:1 0 calc(100% - 42px); }
+  .site-header .theme-switch { order:1; margin-left:auto; }
+@@ -254,3 +258,6 @@
+  .site-header nav { margin-left:0; width:100%; justify-content:space-between; gap:9px; }
+  .site-header nav button span { font-size:10px; }
+ }
++
++/* One consistent family across native controls, code examples and all UI surfaces. */
++code,kbd,samp,pre,input,textarea,select,button { font-family:var(--font-sans); }
+--- baseline/tests/game.spec.ts
++++ modified/tests/game.spec.ts
+@@ -5,6 +5,54 @@
+ 
+ const base = 'http://127.0.0.1:3100';
+ const headers = { origin: base, 'x-expedition': '1' };
++
++async function expectPoppins(page: Page) {
++  const result = await page.evaluate(async () => {
++    const sample = 'CMC Infrasec Truy Tìm Kho Báu — ă â đ ê ô ơ ư';
++    for (const weight of [400, 500, 600, 700, 800]) await document.fonts.load(`${weight} 16px Poppins`, sample);
++    await document.fonts.ready;
++    const loaded = [...document.fonts].some(face => face.family.includes('Poppins') && face.status === 'loaded');
++    const wrong: string[] = [];
++    const walk = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
++    let node: Node | null;
++    while ((node = walk.nextNode())) {
++      const parent = node.parentElement;
++      if (!parent || !node.textContent?.trim() || parent.closest('script,style,noscript,template') || !parent.getClientRects().length) continue;
++      const style = getComputedStyle(parent);
++      if (style.visibility === 'hidden' || style.display === 'none') continue;
++      if (style.fontFamily.split(',')[0].replace(/["']/g, '').trim() !== 'Poppins') wrong.push(parent.tagName + ': ' + style.fontFamily);
++    }
++    return { loaded, wrong };
++  });
++  expect(result).toEqual({ loaded: true, wrong: [] });
++  await page.evaluate(() => {
++    const probe = document.createElement('span');
++    probe.id = 'poppins-vietnamese-probe';
++    probe.setAttribute('aria-hidden', 'true');
++    probe.style.cssText = 'position:fixed;left:-10000px;top:0;font-family:Poppins;font-size:16px;';
++    probe.textContent = String.fromCodePoint(...Array.from({ length: 90 }, (_, i) => 0x1EA0 + i)) + 'ĂăÂâĐđÊêÔôƠơƯư';
++    document.body.append(probe);
++  });
++  const session = await page.context().newCDPSession(page);
++  const proof: unknown[] = [];
++  try {
++    await session.send('DOM.enable'); await session.send('CSS.enable');
++    const { root } = await session.send('DOM.getDocument');
++    const { nodeId } = await session.send('DOM.querySelector', { nodeId: root.nodeId, selector: '#poppins-vietnamese-probe' });
++    for (const weight of [400, 500, 600, 700, 800]) {
++      await page.locator('#poppins-vietnamese-probe').evaluate((span, value) => { span.style.fontWeight = String(value); return span.getBoundingClientRect().width; }, weight);
++      const { fonts } = await session.send('CSS.getPlatformFontsForNode', { nodeId });
++      expect(fonts.length).toBeGreaterThan(0);
++      expect(fonts.every(font => font.isCustomFont && /Poppins/i.test(font.familyName))).toBe(true);
++      expect(fonts.reduce((n, font) => n + font.glyphCount, 0)).toBeGreaterThan(80);
++      proof.push({ weight, fonts });
++    }
++    fs.writeFileSync('evidence/footer-cleanup/font-browser.json', JSON.stringify(proof, null, 2));
++  } finally {
++    await page.locator('#poppins-vietnamese-probe').evaluate(span => span.remove());
++    await session.detach();
++  }
++}
+ 
+ async function expectOpaqueArtwork(logo: Locator) {
+   const minimumAlpha = await logo.evaluate((image: HTMLImageElement) => {
+@@ -78,6 +126,7 @@
+     for (let stage = 1; stage <= 5; stage++) {
+       await expect(page.locator('.mission-top')).toContainText(`0${stage}`);
+       await expect(page.getByLabel('MANH MỐI CỦA BẠN', { exact: true })).not.toHaveValue('');
++      await expect(page.getByLabel('MANH MỐI CỦA BẠN', { exact: true })).toHaveCSS('font-family', /Poppins/);
+       if (stage === 1) {
+         const a11y = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze();
+         expect(a11y.violations).toEqual([]);
+@@ -112,6 +161,7 @@
+     await expectOpaqueArtwork(rewardLogo);
+     await expect(rewardLogo).toHaveCSS('object-fit', 'contain');
+     await expect(rewardLogo).toHaveCSS('filter', 'none');
++    await expect(page.getByTestId('club-logo-reward')).toHaveCSS('border-top-width', '0px');
+     expect((await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze()).violations).toEqual([]);
+     await page.screenshot({ path: `evidence/screenshots/${mode}-reward.png`, fullPage: true });
+     const code = await page.getByTestId('reward-code').textContent();
+@@ -171,16 +221,20 @@
+     await page.setViewportSize({ width, height: 1000 });
+     await page.goto('/');
+     await expect(page.getByLabel('Tên trên bảng xếp hạng')).toBeVisible();
++    await expectPoppins(page);
+     await expect(page.getByRole('heading', { level: 1 })).toHaveText(/CMC Infrasec\s*Truy Tìm Kho Báu/);
++    await expect(page.locator('footer')).toHaveText("(c) CMC Infrasec x NextFest '26");
++    await expect(page.locator('footer img')).toHaveCount(0);
++    await expect(page.getByText('Weight ≤ 10', { exact: false })).toHaveCount(0);
+     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+     for (const theme of ['light', 'dark']) {
+       const current = await page.locator('html').getAttribute('data-theme');
+       if (current !== theme) await page.getByRole('button', { name: theme === 'dark' ? 'Bật giao diện tối' : 'Bật giao diện sáng' }).click();
+-      const background = theme === 'light' ? 'rgb(255, 255, 255)' : 'rgb(0, 0, 0)';
++      const background = theme === 'light' ? 'rgb(254, 254, 254)' : 'rgb(2, 2, 2)';
+       for (const selector of ['body', '.game-shell', '.map-panel']) {
+         await expect(page.locator(selector)).toHaveCSS('background-color', background);
+       }
+-      for (const placement of ['header', 'footer']) {
++      for (const placement of ['header']) {
+         const logo = page.getByTestId(`club-logo-${placement}`).locator('img:visible');
+         await expect(logo).toHaveCount(1);
+         await expect(logo).toHaveAttribute('alt', 'Logo CMC Infrasec');
+@@ -190,6 +244,7 @@
+         await expectOpaqueArtwork(logo);
+         await expect(logo).toHaveCSS('object-fit', 'contain');
+         await expect(logo).toHaveCSS('filter', 'none');
++        await expect(page.getByTestId(`club-logo-${placement}`)).toHaveCSS('border-top-width', '0px');
+         expect(await logo.evaluate(img => Math.abs(img.getBoundingClientRect().width - img.getBoundingClientRect().height))).toBeLessThan(1);
+       }
+       await page.evaluate(() => scrollTo(0, 0));
+Binary font added: public/fonts/poppins-600.woff2; SHA256 f68a052ffcd6a79f736ae3f40688de0a1119435f33c119201c9fcee75e848a40
+Binary font added: public/fonts/poppins-400.woff2; SHA256 4e92d8b9dd339440efa189d55d9214cba43beef211f0d8426e881f8665b0a0cb

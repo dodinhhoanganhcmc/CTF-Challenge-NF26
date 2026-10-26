@@ -1,0 +1,5 @@
+{
+  "components/game.tsx": "f0ef7818cc5061edc93c82d0f6ed7ce148a7b5eb56613d03fff78c372a3f17cb",
+  "app/globals.css": "7791660af6e2d3f5716effbf7e79b1542275ac25f225f5bec09d8d00448e5237",
+  "tests/game.spec.ts": "0ec192fdde2800ebd477f0df7366bcff0306f3465a5078b4e5356e70b3464e21"
+}

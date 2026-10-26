@@ -1,0 +1,220 @@
+VERIFICATION · official logo integration / 2026-10-26
+Changed branch/field: catalog/reward logo_ready false -> true. Header/footer/reward ClubLogo selects opaque white alternative for light and opaque black primary for dark. No crop, recolor, inversion or background removal.
+Palette: forest/stone light and near-black forest dark; text >=4.5:1 and UI >=3:1 across 34 token pairs, plus rendered axe checks.
+MODIFIED_FILE: L:\ctf-chall\evidence\logo-update\MODIFIED_FILE.tsx
+DIFF_FILE: L:\ctf-chall\evidence\logo-update\DIFF_FILE.patch
+VERIFICATION: L:\ctf-chall\evidence\logo-update\VERIFICATION.txt
+ROLLBACK: L:\ctf-chall\evidence\logo-update\ROLLBACK.sh
+Original game SHA256: 6e211a2f196bf9fc48b57bd3cb760a8626fde08b36181a94646685fe1ef42406
+Modified game SHA256: 3361438b98e6a84dbcead6c5ff93fef89a6077a85c392a22e323636692b107ce
+Original supplied artwork hashes: {"club-primary-original.png": {"source": "C:\\Users\\ngoan\\Downloads\\NS Logo.png", "copy": "L:\\ctf-chall\\assets\\branding\\originals\\club-primary-original.png", "sha256": "a22e1deb2716fd8a58076e1b960deaabe718e5f43c0eac52b3041a4d2b33a20a"}, "club-alternative-original.jpg": {"source": "C:\\Users\\ngoan\\Downloads\\NS Logo Amban.jpg", "copy": "L:\\ctf-chall\\assets\\branding\\originals\\club-alternative-original.jpg", "sha256": "e97f24b22ba2cb54a699a0491412becc731094523f3cbd37c6315f01c853dfeb"}}
+
+BASELINE
+COMMAND: .venv\Scripts\python.exe evidence/logo-update/check_branding.py evidence/logo-update/baseline
+INPUT: Preserved pre-logo source; GET /api/v1/catalog and both asset paths.
+LITERAL STDOUT:
+BRANDING logo_ready=false primary=missing alternative=missing
+
+LITERAL STDERR:
+
+EXIT STATUS: 0
+
+MODIFIED
+COMMAND: .venv\Scripts\python.exe evidence/logo-update/check_branding.py .
+INPUT: Current source; GET /api/v1/catalog and both decoded official asset files.
+LITERAL STDOUT:
+BRANDING logo_ready=true primary=1024x1024 alternative=1024x1024
+
+LITERAL STDERR:
+
+EXIT STATUS: 0
+
+PALETTE
+COMMAND: .venv\Scripts\python.exe scripts/check_palette.py
+INPUT: Actual CSS tokens; 34 WCAG text/UI pairs.
+LITERAL STDOUT:
+PALETTE_OK pairs=34 min_text=5.16 min_ui=3.69
+
+LITERAL STDERR:
+
+EXIT STATUS: 0
+
+API_TESTS
+COMMAND: .venv\Scripts\python.exe -m pytest backend/tests -q
+INPUT: Both real puzzle journeys, progression, persistence, reward and input controls.
+LITERAL STDOUT:
+............................                                             [100%]
+28 passed in 3.27s
+
+LITERAL STDERR:
+
+EXIT STATUS: 0
+
+TYPECHECK
+COMMAND: npm run typecheck
+INPUT: All TypeScript including ClubLogo and gameplay.
+LITERAL STDOUT:
+
+> dao-mat-ma@1.0.0 typecheck
+> tsc --noEmit
+
+
+LITERAL STDERR:
+
+EXIT STATUS: 0
+
+BUILD
+COMMAND: npm run build
+INPUT: Production application with supplied opaque logo pair.
+LITERAL STDOUT:
+
+> dao-mat-ma@1.0.0 build
+> next build
+
+▲ Next.js 16.4.3 (Turbopack)
+✓ Running next.config.ts took 39ms
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 477ms
+  Running TypeScript ...
+  Finished TypeScript in 1604ms ...
+  Collecting page data using 5 workers ...
+  Generating static pages using 5 workers (0/3) ...
+✓ Generating static pages using 5 workers (3/3) in 415ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+└ ƒ /api/v1/[...path]
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+
+LITERAL STDERR:
+
+EXIT STATUS: 0
+
+E2E
+COMMAND: npm run test:e2e
+INPUT: Production browser; both full journeys; 5 widths × 2 themes; header/footer/reward logos; axe including dark secondary controls.
+LITERAL STDOUT:
+
+> dao-mat-ma@1.0.0 test:e2e
+> playwright test
+
+
+Running 7 tests using 1 worker
+
+  ✓  1 tests\game.spec.ts:23:5 › all learning-bench methods and input errors (12ms)
+  ✓  2 tests\game.spec.ts:70:7 › complete five-stage easy journey, reward, restart and leaderboard (4.9s)
+  ✓  3 tests\game.spec.ts:70:7 › complete five-stage hard journey, reward, restart and leaderboard (5.3s)
+  ✓  4 tests\game.spec.ts:130:5 › hints, download, journal, guide, replay and theme controls (2.3s)
+  ✓  5 tests\game.spec.ts:157:5 › proxy origin, allowlist, body limits and session isolation (131ms)
+  ✓  6 tests\game.spec.ts:168:5 › responsive light/dark, keyboard, accessibility and visual evidence (14.4s)
+  ✓  7 tests\game.spec.ts:206:5 › official logo assets are served and authorize the real reward artwork (28ms)
+
+  7 passed (32.5s)
+
+LITERAL STDERR:
+[WebServer] INFO:     Started server process [44960]
+[WebServer] INFO:     Waiting for application startup.
+[WebServer] INFO:     Application startup complete.
+[WebServer] INFO:     Uvicorn running on http://127.0.0.1:8100 (Press CTRL+C to quit)
+[WebServer] (node:2776) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+(node:24580) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+EXIT STATUS: 0
+
+NPM_AUDIT
+COMMAND: npm audit --json
+INPUT: Current package-lock.json
+LITERAL STDOUT:
+{
+  "auditReportVersion": 2,
+  "vulnerabilities": {},
+  "metadata": {
+    "vulnerabilities": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "total": 0
+    },
+    "dependencies": {
+      "prod": 23,
+      "dev": 48,
+      "optional": 61,
+      "peer": 0,
+      "peerOptional": 0,
+      "total": 108
+    }
+  }
+}
+
+LITERAL STDERR:
+
+EXIT STATUS: 0
+
+PIP_AUDIT
+COMMAND: .venv\Scripts\python.exe -m pip_audit -r backend/requirements-lock.txt --format=json
+INPUT: Current Python dependency lock
+LITERAL STDOUT:
+{"dependencies": [{"name": "annotated-doc", "version": "0.0.5", "vulns": []}, {"name": "annotated-types", "version": "0.8.0", "vulns": []}, {"name": "anyio", "version": "4.15.1", "vulns": []}, {"name": "certifi", "version": "2026.10.23", "vulns": []}, {"name": "click", "version": "8.5.0", "vulns": []}, {"name": "colorama", "version": "0.4.6", "vulns": []}, {"name": "fastapi", "version": "0.135.1", "vulns": []}, {"name": "h11", "version": "0.16.0", "vulns": []}, {"name": "httpcore2", "version": "2.16.0", "vulns": []}, {"name": "httpcore", "version": "1.0.9", "vulns": []}, {"name": "httpx2", "version": "2.16.0", "vulns": []}, {"name": "httpx", "version": "0.28.1", "vulns": []}, {"name": "idna", "version": "3.20", "vulns": []}, {"name": "iniconfig", "version": "2.3.1", "vulns": []}, {"name": "pillow", "version": "13.0.0", "vulns": []}, {"name": "pluggy", "version": "1.7.0", "vulns": []}, {"name": "pydantic-core", "version": "2.50.1", "vulns": []}, {"name": "pydantic", "version": "2.14.1", "vulns": []}, {"name": "pygments", "version": "2.21.0", "vulns": []}, {"name": "pytest", "version": "9.1.1", "vulns": []}, {"name": "pyyaml", "version": "6.0.3", "vulns": []}, {"name": "starlette", "version": "1.9.0", "vulns": []}, {"name": "truststore", "version": "0.10.5", "vulns": []}, {"name": "typing-extensions", "version": "4.16.0", "vulns": []}, {"name": "typing-inspection", "version": "0.4.4", "vulns": []}, {"name": "uvicorn", "version": "0.41.0", "vulns": []}], "fixes": []}
+
+LITERAL STDERR:
+No known vulnerabilities found
+
+EXIT STATUS: 0
+
+OPENAPI
+COMMAND: npx --yes @redocly/cli lint docs/openapi.json --format=summary
+INPUT: Current OpenAPI contract
+LITERAL STDOUT:
+
+LITERAL STDERR:
+validating docs\openapi.json...
+docs\openapi.json: validated in 26ms
+
+Woohoo! Your API description is valid. 🎉
+
+
+EXIT STATUS: 0
+
+ROLLBACK
+COMMAND: "C:\Program Files\Git\bin\bash.exe" evidence/logo-update/ROLLBACK.sh L:/ctf-chall/evidence/logo-update/rollback-copy
+INPUT: Dedicated copy only; original source hashes verified before restoring.
+LITERAL STDOUT:
+ROLLBACK_OK restored=43 removed=4
+
+LITERAL STDERR:
+
+EXIT STATUS: 0
+
+RESTORED
+COMMAND: .venv\Scripts\python.exe evidence/logo-update/check_branding.py evidence/logo-update/rollback-copy
+INPUT: Restored copy; pre-logo behavior while the real working copy stays branded.
+LITERAL STDOUT:
+BRANDING logo_ready=false primary=missing alternative=missing
+
+LITERAL STDERR:
+
+EXIT STATUS: 0
+
+Restored status: logo_ready=false; primary=missing; alternative=missing on the separate rollback copy. Player-data marker preserved.
+Actual project remains modified: logo_ready=true, both supplied logo variants installed, original input files unchanged.
+No pending logo input remains. Local application launch is recorded separately in deployment.log.
+
+DEPLOYMENT
+COMMAND: .venv\Scripts\python.exe evidence/logo-update/deploy_check.py
+INPUT: running local production app and versioned optimized logo images
+LITERAL OUTPUT:
+DEPLOYED http://127.0.0.1:3000 HTTP 200 logo_ready=true optimized_dark=256x256 optimized_light=256x256 opaque=true
+GAMEPLAY guest=201 first_stage=200
+SOURCE_HASHES current=47 all_match=true
+EXIT STATUS: 0

@@ -1,0 +1,3 @@
+LIVE HTTP 200 light=#fefefe dark=#020202 logo_border=0 footer_logo=false copyright=true weight_label=false font=Poppins
+VIETNAMESE_RENDERING weights=400,500,600,700,800 custom_poppins_only=true
+SOURCE_HASHES all_match=true

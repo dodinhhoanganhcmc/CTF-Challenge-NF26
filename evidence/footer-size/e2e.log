@@ -1,0 +1,24 @@
+
+> dao-mat-ma@1.0.0 test:e2e
+> playwright test
+
+
+Running 7 tests using 1 worker
+
+  ✓  1 tests\game.spec.ts:71:5 › all learning-bench methods and input errors (6ms)
+  ✓  2 tests\game.spec.ts:118:7 › complete five-stage easy journey, reward, restart and leaderboard (3.7s)
+  ✓  3 tests\game.spec.ts:118:7 › complete five-stage hard journey, reward, restart and leaderboard (5.4s)
+  ✓  4 tests\game.spec.ts:180:5 › hints, download, journal, guide, replay and theme controls (2.7s)
+  ✓  5 tests\game.spec.ts:207:5 › proxy origin, allowlist, body limits and session isolation (216ms)
+  ✓  6 tests\game.spec.ts:218:5 › responsive light/dark, keyboard, accessibility and visual evidence (5.6s)
+  ✓  7 tests\game.spec.ts:291:5 › official logo assets are served and authorize the real reward artwork (20ms)
+
+  7 passed (22.7s)
+[WebServer] INFO:     Started server process [48992]
+[WebServer] INFO:     Waiting for application startup.
+[WebServer] INFO:     Application startup complete.
+[WebServer] INFO:     Uvicorn running on http://127.0.0.1:8100 (Press CTRL+C to quit)
+[WebServer] (node:36744) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+(node:46876) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)

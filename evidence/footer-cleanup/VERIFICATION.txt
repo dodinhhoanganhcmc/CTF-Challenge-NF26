@@ -1,0 +1,225 @@
+VERIFICATION: borderless logos, copyright-only footer, final background tokens
+Changed fields: light surfaces -> #FEFEFE; dark surfaces -> #020202; logo border -> 0; footer -> (c) CMC Infrasec x NextFest '26; no footer logo/taglines or Weight ≤ 10 label. Replay moved beside guest summary. All UI fonts changed to Poppins. Logo assets unchanged.
+MODIFIED_FILE: L:\ctf-chall\evidence\footer-cleanup\MODIFIED_FILE.tsx
+DIFF_FILE: L:\ctf-chall\evidence\footer-cleanup\DIFF_FILE.patch
+VERIFICATION: L:\ctf-chall\evidence\footer-cleanup\VERIFICATION.txt
+ROLLBACK: L:\ctf-chall\evidence\footer-cleanup\ROLLBACK.sh
+Original game SHA256: e4e242fed273faa21dcf1e77a743b4bda2bece554a182c68bc862d005cee8f5b
+Modified game SHA256: e0a32fd690f8b7495a1664686b765e8277f9c1e2d14c5ae1a2b2772b9f94e1fc
+
+BASELINE
+COMMAND: .venv\Scripts\python.exe evidence/footer-cleanup/check_state.py evidence/footer-cleanup/baseline
+INPUT: Original background colors, logo border, footer logo, Weight label and font.
+LITERAL STDOUT:
+{"light":"#ffffff","dark":"#000000","logo_border":"1px solid var(--line)","footer_logo":true,"copyright":false,"weight_label":true,"poppins":false}
+
+LITERAL STDERR:
+
+EXIT STATUS: 0
+
+MODIFIED
+COMMAND: .venv\Scripts\python.exe evidence/footer-cleanup/check_state.py .
+INPUT: User-specified colors, borderless logo, copyright-only footer, removed Weight label and Poppins.
+LITERAL STDOUT:
+{"light":"#fefefe","dark":"#020202","logo_border":"0","footer_logo":false,"copyright":true,"weight_label":false,"poppins":true}
+
+LITERAL STDERR:
+
+EXIT STATUS: 0
+
+PALETTE
+COMMAND: .venv\Scripts\python.exe scripts/check_palette.py
+INPUT: 34 actual text, button, border and focus color pairs.
+LITERAL STDOUT:
+PALETTE_OK pairs=34 min_text=6.07 min_ui=4.50
+
+LITERAL STDERR:
+
+EXIT STATUS: 0
+
+API_TESTS
+COMMAND: .venv\Scripts\python.exe -m pytest backend/tests -q
+INPUT: Existing real puzzle and opaque logo regressions.
+LITERAL STDOUT:
+............................                                             [100%]
+28 passed in 7.06s
+
+LITERAL STDERR:
+
+EXIT STATUS: 0
+
+TYPECHECK
+COMMAND: npm run typecheck
+INPUT: Current TypeScript.
+LITERAL STDOUT:
+
+> dao-mat-ma@1.0.0 typecheck
+> tsc --noEmit
+
+
+LITERAL STDERR:
+
+EXIT STATUS: 0
+
+BUILD
+COMMAND: npm run build
+INPUT: Current production frontend.
+LITERAL STDOUT:
+
+> dao-mat-ma@1.0.0 build
+> next build
+
+▲ Next.js 16.4.3 (Turbopack)
+✓ Running next.config.ts took 220ms
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 56s
+  Running TypeScript ...
+  Finished TypeScript in 2.1s ...
+  Collecting page data using 5 workers ...
+  Generating static pages using 5 workers (0/3) ...
+✓ Generating static pages using 5 workers (3/3) in 592ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+└ ƒ /api/v1/[...path]
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+
+LITERAL STDERR:
+
+EXIT STATUS: 0
+
+E2E
+COMMAND: npm run test:e2e
+INPUT: Both journeys; five widths/two themes; exact #FEFEFE/#020202 backgrounds, borderless logos, text-only footer, removed Weight label; Poppins loaded for all visible text and Vietnamese; replay still works.
+LITERAL STDOUT:
+
+> dao-mat-ma@1.0.0 test:e2e
+> playwright test
+
+
+Running 7 tests using 1 worker
+
+  ✓  1 tests\game.spec.ts:71:5 › all learning-bench methods and input errors (7ms)
+  ✓  2 tests\game.spec.ts:118:7 › complete five-stage easy journey, reward, restart and leaderboard (4.8s)
+  ✓  3 tests\game.spec.ts:118:7 › complete five-stage hard journey, reward, restart and leaderboard (5.6s)
+  ✓  4 tests\game.spec.ts:180:5 › hints, download, journal, guide, replay and theme controls (3.1s)
+  ✓  5 tests\game.spec.ts:207:5 › proxy origin, allowlist, body limits and session isolation (450ms)
+  ✓  6 tests\game.spec.ts:218:5 › responsive light/dark, keyboard, accessibility and visual evidence (7.2s)
+  ✓  7 tests\game.spec.ts:267:5 › official logo assets are served and authorize the real reward artwork (20ms)
+
+  7 passed (26.6s)
+
+LITERAL STDERR:
+[WebServer] INFO:     Started server process [44924]
+[WebServer] INFO:     Waiting for application startup.
+[WebServer] INFO:     Application startup complete.
+[WebServer] INFO:     Uvicorn running on http://127.0.0.1:8100 (Press CTRL+C to quit)
+[WebServer] (node:4180) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+(node:57528) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+EXIT STATUS: 0
+
+NPM_AUDIT
+COMMAND: npm audit --json
+INPUT: Updated Poppins dependency and lockfile.
+LITERAL STDOUT:
+{
+  "auditReportVersion": 2,
+  "vulnerabilities": {},
+  "metadata": {
+    "vulnerabilities": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "total": 0
+    },
+    "dependencies": {
+      "prod": 21,
+      "dev": 48,
+      "optional": 61,
+      "peer": 0,
+      "peerOptional": 0,
+      "total": 106
+    }
+  }
+}
+
+LITERAL STDERR:
+
+EXIT STATUS: 0
+
+ROLLBACK
+COMMAND: "C:\Program Files\Git\bin\bash.exe" evidence/footer-cleanup/ROLLBACK.sh L:/ctf-chall/evidence/footer-cleanup/rollback-copy
+INPUT: Separate copy; source restored, npm ci and production build verify original fonts/dependencies. No player data touched.
+LITERAL STDOUT:
+ROLLBACK_OK restored=47 removed=6
+
+added 56 packages in 2m
+
+> dao-mat-ma@1.0.0 build
+> next build
+
+▲ Next.js 16.4.3 (Turbopack)
+✓ Running next.config.ts took 38ms
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 1640ms
+  Running TypeScript ...
+  Finished TypeScript in 2.5s ...
+  Collecting page data using 5 workers ...
+  Generating static pages using 5 workers (0/3) ...
+✓ Generating static pages using 5 workers (3/3) in 688ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+└ ƒ /api/v1/[...path]
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+ROLLBACK_BUILD_OK
+
+LITERAL STDERR:
+⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of L:\ctf-chall\package-lock.json as the root directory.
+ To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory for more information.
+ Detected additional lockfiles: 
+   * L:\ctf-chall\evidence\footer-cleanup\rollback-copy\package-lock.json
+
+
+EXIT STATUS: 0
+
+RESTORED
+COMMAND: .venv\Scripts\python.exe evidence/footer-cleanup/check_state.py evidence/footer-cleanup/rollback-copy
+INPUT: Verify previous palette and heading are restored on the copy only.
+LITERAL STDOUT:
+{"light":"#ffffff","dark":"#000000","logo_border":"1px solid var(--line)","footer_logo":true,"copyright":false,"weight_label":true,"poppins":false}
+
+LITERAL STDERR:
+
+EXIT STATUS: 0
+
+Restored behavior/status: previous colors, visible logo border, footer logo and Weight label on the separate copy; all 47 original hashes restored.
+Working project remains updated with the latest footer and precise background colors. Both supplied logo files remain unchanged.
+
+DEPLOYMENT
+COMMAND: powershell -NoProfile -ExecutionPolicy Bypass -File scripts/start.ps1
+INPUT: current local production build and bundled Poppins WOFF2 assets
+RESULT: LIVE HTTP 200 light=#fefefe dark=#020202 logo_border=0 footer_logo=false copyright=true weight_label=false font=Poppins
+EXIT STATUS: 0
+Vietnamese cmap and browser platform-font proof: font-coverage.json and font-browser.json.

@@ -1,0 +1,26 @@
+# Visual direction
+Seven grounded systems, ordered: expedition field guide, museum discovery trail, nautical chart, scout badge book, puzzle magazine, archipelago board game, illustrated travel passport.
+Assigned candidate 6: archipelago board game. A real playable map occupies the first viewport; each distinct destination is a stage and a current mission sits beside it. Pale ocean, coral action, forest ink; Bricolage Grotesque display and Plus Jakarta Sans body.
+Challenger verdicts: Swiss poster wall competitive for clarity, but weaker adventure identification; mezzotint declined on readability and familiarity; aircraft gauges declined because there is no telemetry; ebru declined because liquid patterns do not express sequence; glazier wall declined because destinations need a route; moon-shadow bazaar declined because commerce conflicts with treasure discovery.
+Raises: Swiss grid discipline aligns mission and legend; mezzotint contrast discipline gives every state a readable contour; aircraft cross-check discipline reconciles fragment count with server state; ebru commitment keeps one visual world; glazier explicit state grammar distinguishes locked/current/solved; bazaar continuity keeps a debrief attached to every earned fragment.
+Nav N7 rounded slab; footer Ft5 statement. Map / Diagram macrostructure; Hum interpreted for this adventure. No marketing claims. Motion communicates a new fragment and map selection only; reduced motion removes spatial transitions. Mobile map becomes an ordered destination strip and mission stack, preserving access without tiny labels.
+
+## Official branding / 2026-10-26
+
+The supplied logos are complete square compositions with opaque backgrounds. Keep their full framing and all original pixels; do not cut out the globe or invert/recolor the artwork. Use the black primary in dark mode, white alternative in light mode. Header mark: 88px desktop / 68px mobile; footer: 112px; reward: 248px desktop / 216px mobile. The large reward treatment keeps the detailed club composition legible. Logos sit in square, lightly outlined plates, never a circular crop.
+
+Light tokens: paper #F6F7F3; panel #FFFFFF; ink #18382F; muted #4F665D; ocean #E4EEE8; CTA #AD3B25. Dark tokens: paper #0E1915; panel #172720; ink #F2F5EF; muted #B5C9BB; ocean #1A342A; CTA #FFB08F. Restrained forest/stone colors retain the approved adventure direction and support the monochrome branding. Warm CTA is the only dominant action accent.
+
+Contrast gate checks 34 token pairs: normal text at least 4.5:1 and field/focus boundaries at least 3:1. Measured minima: text 5.16:1, UI 3.69:1. Browser axe checks additionally cover rendered layouts, both themes, mission and reward. Keep dark secondary-button labels light rather than applying the primary-button dark label override.
+
+## Superseding user correction / 2026-10-26
+
+Pure backgrounds replace the earlier forest-tinted surfaces: paper, panel, ocean and soft tokens are #FFFFFF in light mode and #000000 in dark mode. Islands and rules use neutral grayscale. Supplied logos remain unchanged and theme-aware. The hero now reads “CMC Infrasec / Truy Tìm Kho Báu”. Warm action accents are retained for control recognition; all text and UI contrast gates are rerun on the updated tokens.
+
+## Latest footer/logo correction
+
+Logo containers have no visible border and no rounded frame. Only header and reward retain the supplied logos. The footer contains only `(c) CMC Infrasec x NextFest '26`; both the closing slogan and journey tagline are removed. The guest summary no longer shows Weight ≤ 10. Replay remains accessible beside the guest name/score.
+
+The final user-specified background tokens supersede pure white/black: light #FEFEFE, dark #020202, including page, panels, map and logo plates.
+
+Latest typography correction: all text uses self-hosted Poppins, including headings, labels, controls and puzzle/code content. Previous display/body/monospace families are superseded. Font loading and Vietnamese glyph coverage are checked in-browser.

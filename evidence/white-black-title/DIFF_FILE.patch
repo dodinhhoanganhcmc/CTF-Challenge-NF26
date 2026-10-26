@@ -1,0 +1,126 @@
+--- baseline/README.md
++++ modified/README.md
+@@ -46,7 +46,7 @@
+ 
+ Bản dùng trên web là `public/club-logo.png` (PNG 1024×1024, thu nhỏ bản chính) và `public/club-logo-light.jpg` (bản JPEG thay thế nguyên gốc). Header, footer và màn nhận thưởng dùng bản trắng ở giao diện sáng, bản đen ở giao diện tối. Giữ toàn bộ bố cục vuông, không cắt, không đảo màu, không tách nền; Next.js tự tối ưu kích thước tải về.
+ 
+-Palette sáng: trắng ngà, mực xanh rừng, biển xanh xám và CTA đất nung. Palette tối: xanh than gần đen, chữ trắng ngà và CTA cam đào. Kiểm tra contrast bằng `.\.venv\Scripts\python.exe scripts/check_palette.py`; kết quả chi tiết trong `evidence/logo-update/palette-contrast.json`.
++Theo cập nhật mới nhất: nền trang, panel và bản đồ trắng hoàn toàn #FFFFFF ở theme sáng, đen hoàn toàn #000000 ở theme tối để hòa với nền logo. Đảo và đường viền dùng xám trung tính; CTA giữ màu đất nung/cam đào để dễ nhận biết. Tiêu đề chính là “CMC Infrasec — Truy Tìm Kho Báu”. Kiểm tra contrast bằng `.\.venv\Scripts\python.exe scripts/check_palette.py`; kết quả chi tiết trong `evidence/white-black-title/palette-contrast.json`.
+ 
+ Sau khi thay ảnh trong public, chạy build và khởi động lại:
+ 
+--- baseline/app/globals.css
++++ modified/app/globals.css
+@@ -8,8 +8,8 @@
+   --color-coral: var(--coral);
+   --color-ocean: var(--ocean);
+ }
+-:root { --paper:#f6f7f3; --panel:#ffffff; --ink:#18382f; --muted:#4f665d; --coral:#ad3b25; --coral-bright:#ed7854; --ocean:#e4eee8; --land:#c4d6bc; --line:#c9d8cf; --control-border:#748a80; --soft:#edf1e9; --focus:#126c8a; --success:#246644; --error:#a42f25; --shadow:0 22px 60px #183e3814; color-scheme:light; }
+-:root[data-theme='dark'] { --paper:#0e1915; --panel:#172720; --ink:#f2f5ef; --muted:#b5c9bb; --coral:#ffb08f; --coral-bright:#f39e78; --ocean:#1a342a; --land:#355442; --line:#405e4d; --control-border:#789b86; --soft:#233d2d; --focus:#96dcec; --success:#a5e6bc; --error:#ffb4a8; --shadow:0 22px 60px #0002; color-scheme:dark; }
++:root { --paper:#ffffff; --panel:#ffffff; --ink:#171717; --muted:#555555; --coral:#ad3b25; --coral-bright:#ed7854; --ocean:#ffffff; --land:#ececec; --line:#d5d5d5; --control-border:#767676; --soft:#ffffff; --focus:#126c8a; --success:#246644; --error:#a42f25; --shadow:0 22px 60px #0000000d; color-scheme:light; }
++:root[data-theme='dark'] { --paper:#000000; --panel:#000000; --ink:#f5f5f5; --muted:#bdbdbd; --coral:#ffb08f; --coral-bright:#f39e78; --ocean:#000000; --land:#202020; --line:#404040; --control-border:#888888; --soft:#000000; --focus:#96dcec; --success:#a5e6bc; --error:#ffb4a8; --shadow:0 22px 60px #00000022; color-scheme:dark; }
+ * { box-sizing:border-box; }
+ html { scroll-behavior:smooth; }
+ body { margin:0; background:var(--paper); color:var(--ink); font:14px/1.65 'Plus Jakarta Sans Variable',sans-serif; }
+@@ -72,7 +72,7 @@
+ .map-node { position:absolute; transform:translate(-50%,-50%); display:flex; align-items:center; flex-direction:column; padding:8px 4px; min-width:98px; line-height:1.3; }
+ .node-number { display:grid; place-items:center; width:24px; height:24px; font-size:9px; font-weight:700; background:var(--panel); border:1px solid var(--ink); border-radius:50%; margin-bottom:7px; }
+ .node-number svg { width:12px; height:12px; }
+-.destination-icon { filter:drop-shadow(0 4px 0 #183e3812); }
++.destination-icon { filter:drop-shadow(0 4px 0 #00000012); }
+ .node-name { font-size:10px; font-weight:750; margin-top:7px; padding:3px 6px; background:var(--ocean); border-radius:3px; white-space:nowrap; }
+ .node-weight { color:var(--muted); font-size:8px; margin-top:3px; background:var(--ocean); padding:2px 3px; }
+ .map-node.active .node-number { background:var(--coral); color:var(--panel); border-color:var(--coral); box-shadow:0 0 0 5px color-mix(in srgb,var(--coral) 14%,transparent); }
+@@ -114,7 +114,7 @@
+ .flag-form { margin-top:22px; }
+ .flag-form input { font:12px/1.6 ui-monospace,monospace; }
+ .button { display:inline-flex; align-items:center; justify-content:center; gap:12px; padding:12px 18px; border:1px solid var(--coral); border-radius:6px; background:var(--coral); color:var(--panel); font-size:12px; font-weight:700; line-height:1.5; min-height:44px; }
+-:root[data-theme='dark'] .button:not(.secondary) { color:#183e38; }
++:root[data-theme='dark'] .button:not(.secondary) { color:#171717; }
+ .button:hover:not(:disabled) { filter:brightness(.93); transform:translateY(-1px); }
+ .button.full { display:flex; width:100%; margin-top:11px; justify-content:space-between; }
+ .button.secondary { border-color:var(--control-border); background:var(--panel); color:var(--ink); }
+@@ -171,7 +171,7 @@
+ .footer-bottom > span:first-child { font-weight:750; }
+ .footer-bottom > span:nth-child(2) { color:var(--muted); }
+ .modal { position:fixed; inset:0; margin:auto; width:min(650px,calc(100% - 32px)); max-height:calc(100dvh - 48px); background:var(--panel); color:var(--ink); padding:28px; border:1.5px solid var(--ink); border-radius:12px; box-shadow:0 30px 120px #0003; overflow-y:auto; }
+-.modal::backdrop { background:#102c26aa; backdrop-filter:blur(4px); }
++.modal::backdrop { background:#000000aa; backdrop-filter:blur(4px); }
+ .modal-heading { display:flex; justify-content:space-between; align-items:center; gap:16px; border-bottom:1px solid var(--line); padding-bottom:17px; margin-bottom:22px; }
+ .modal-heading h2 { font-size:28px; line-height:1.1; letter-spacing:-.8px; }
+ .modal p { font-size:12px; line-height:1.9; }
+@@ -220,7 +220,7 @@
+ .club-logo img { width:100%; height:100%; object-fit:contain; filter:none; mix-blend-mode:normal; }
+ .club-logo .club-logo-light { display:block; }
+ .club-logo .club-logo-dark { display:none; }
+-:root[data-theme='dark'] .club-logo { background:#020202; }
++:root[data-theme='dark'] .club-logo { background:#000000; }
+ :root[data-theme='dark'] .club-logo .club-logo-light { display:none; }
+ :root[data-theme='dark'] .club-logo .club-logo-dark { display:block; }
+ .site-header { min-height:113px; padding-top:12px; padding-bottom:12px; }
+--- baseline/components/game.tsx
++++ modified/components/game.tsx
+@@ -178,7 +178,7 @@
+     <main>
+       <section className="intro" aria-labelledby="title">
+         <div><p className="eyebrow"><span className="live-dot" /> NEXTFEST 26 · CHUYẾN ĐI CỦA NHỮNG NGƯỜI TÒ MÒ</p>
+-          <h1 id="title">Một hòn đảo.<br />Năm điều <span>bí mật.</span></h1>
++          <h1 id="title">CMC Infrasec<br /><span>Truy Tìm Kho Báu</span></h1>
+           <p className="intro-copy">Không cần là hacker để bắt đầu. Lần theo manh mối, giải những mật mã đầu tiên — và tìm kho báu của riêng bạn.</p>
+         </div>
+         <aside className="expedition-note"><CompassIcon size={38} weight="duotone" /><span className="eyebrow">CHUYẾN THÁM HIỂM ĐẦU TIÊN</span><p>Bắt đầu bằng tò mò.<br />Trở về với một kỹ năng mới.</p><span className="note-bottom">5 địa điểm <span>·</span> 1 kho báu <span>·</span> Bạn</span></aside>
+--- baseline/docs/visual-direction.md
++++ modified/docs/visual-direction.md
+@@ -12,3 +12,7 @@
+ Light tokens: paper #F6F7F3; panel #FFFFFF; ink #18382F; muted #4F665D; ocean #E4EEE8; CTA #AD3B25. Dark tokens: paper #0E1915; panel #172720; ink #F2F5EF; muted #B5C9BB; ocean #1A342A; CTA #FFB08F. Restrained forest/stone colors retain the approved adventure direction and support the monochrome branding. Warm CTA is the only dominant action accent.
+ 
+ Contrast gate checks 34 token pairs: normal text at least 4.5:1 and field/focus boundaries at least 3:1. Measured minima: text 5.16:1, UI 3.69:1. Browser axe checks additionally cover rendered layouts, both themes, mission and reward. Keep dark secondary-button labels light rather than applying the primary-button dark label override.
++
++## Superseding user correction / 2026-10-26
++
++Pure backgrounds replace the earlier forest-tinted surfaces: paper, panel, ocean and soft tokens are #FFFFFF in light mode and #000000 in dark mode. Islands and rules use neutral grayscale. Supplied logos remain unchanged and theme-aware. The hero now reads “CMC Infrasec / Truy Tìm Kho Báu”. Warm action accents are retained for control recognition; all text and UI contrast gates are rerun on the updated tokens.
+--- baseline/scripts/check_palette.py
++++ modified/scripts/check_palette.py
+@@ -28,14 +28,14 @@
+     for fg in ('success', 'error'):
+         results.append({'theme': theme, 'foreground': fg, 'background': 'panel',
+                         'ratio': round(contrast(colors[fg], colors['panel']), 3), 'threshold': 4.5})
+-    button_text = colors['panel'] if theme == 'light' else '#183e38'
++    button_text = colors['panel'] if theme == 'light' else '#171717'
+     results.append({'theme': theme, 'foreground': 'button-label', 'background': 'coral',
+                     'ratio': round(contrast(button_text, colors['coral']), 3), 'threshold': 4.5})
+     for fg in ('control-border', 'focus'):
+         results.append({'theme': theme, 'foreground': fg, 'background': 'panel',
+                         'ratio': round(contrast(colors[fg], colors['panel']), 3), 'threshold': 3.0})
+ failed = [row for row in results if row['ratio'] < row['threshold']]
+-output = root / 'evidence/logo-update/palette-contrast.json'
++output = root / 'evidence/white-black-title/palette-contrast.json'
+ output.parent.mkdir(parents=True, exist_ok=True)
+ output.write_text(json.dumps(results, indent=2), encoding='utf-8')
+ if failed:
+--- baseline/tests/game.spec.ts
++++ modified/tests/game.spec.ts
+@@ -171,10 +171,15 @@
+     await page.setViewportSize({ width, height: 1000 });
+     await page.goto('/');
+     await expect(page.getByLabel('Tên trên bảng xếp hạng')).toBeVisible();
++    await expect(page.getByRole('heading', { level: 1 })).toHaveText(/CMC Infrasec\s*Truy Tìm Kho Báu/);
+     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+     for (const theme of ['light', 'dark']) {
+       const current = await page.locator('html').getAttribute('data-theme');
+       if (current !== theme) await page.getByRole('button', { name: theme === 'dark' ? 'Bật giao diện tối' : 'Bật giao diện sáng' }).click();
++      const background = theme === 'light' ? 'rgb(255, 255, 255)' : 'rgb(0, 0, 0)';
++      for (const selector of ['body', '.game-shell', '.map-panel']) {
++        await expect(page.locator(selector)).toHaveCSS('background-color', background);
++      }
+       for (const placement of ['header', 'footer']) {
+         const logo = page.getByTestId(`club-logo-${placement}`).locator('img:visible');
+         await expect(logo).toHaveCount(1);
+@@ -197,6 +202,7 @@
+   await page.getByRole('button', { name: 'Cách chơi', exact: true }).focus();
+   await page.keyboard.press('Enter');
+   await expect(page.getByRole('dialog')).toBeVisible();
++  expect(await page.getByRole('dialog').evaluate(dialog => getComputedStyle(dialog, '::backdrop').backgroundColor)).toMatch(/^rgba\(0, 0, 0,/);
+   const a11y = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze();
+   expect(a11y.violations).toEqual([]);
+   await page.keyboard.press('Escape');

@@ -1,0 +1,57 @@
+[
+  {
+    "weight": 400,
+    "fonts": [
+      {
+        "familyName": "Fz Poppins",
+        "postScriptName": "FzPoppins-Regular",
+        "isCustomFont": true,
+        "glyphCount": 104
+      }
+    ]
+  },
+  {
+    "weight": 500,
+    "fonts": [
+      {
+        "familyName": "Fz Poppins Med",
+        "postScriptName": "FzPoppins-Medium",
+        "isCustomFont": true,
+        "glyphCount": 104
+      }
+    ]
+  },
+  {
+    "weight": 600,
+    "fonts": [
+      {
+        "familyName": "Fz Poppins SemBd",
+        "postScriptName": "FzPoppins-SemiBold",
+        "isCustomFont": true,
+        "glyphCount": 104
+      }
+    ]
+  },
+  {
+    "weight": 700,
+    "fonts": [
+      {
+        "familyName": "Fz Poppins",
+        "postScriptName": "FzPoppins-Bold",
+        "isCustomFont": true,
+        "glyphCount": 104
+      }
+    ]
+  },
+  {
+    "weight": 800,
+    "fonts": [
+      {
+        "familyName": "Fz Poppins ExtBd",
+        "postScriptName": "FzPoppins-ExtraBold",
+        "isCustomFont": true,
+        "glyphCount": 104
+      }
+    ]
+  }
+]

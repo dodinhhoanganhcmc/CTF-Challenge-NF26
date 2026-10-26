@@ -1,0 +1,37 @@
+[
+  {
+    "weight": 400,
+    "file": "public\\fonts\\poppins-400.woff2",
+    "sha256": "4e92d8b9dd339440efa189d55d9214cba43beef211f0d8426e881f8665b0a0cb",
+    "vietnamese_coverage": true,
+    "bytes": 94528
+  },
+  {
+    "weight": 500,
+    "file": "public\\fonts\\poppins-500.woff2",
+    "sha256": "e2a6df2be82048220dab39c4461e47f7637948201514d50326479664715fb6d6",
+    "vietnamese_coverage": true,
+    "bytes": 100760
+  },
+  {
+    "weight": 600,
+    "file": "public\\fonts\\poppins-600.woff2",
+    "sha256": "f68a052ffcd6a79f736ae3f40688de0a1119435f33c119201c9fcee75e848a40",
+    "vietnamese_coverage": true,
+    "bytes": 99880
+  },
+  {
+    "weight": 700,
+    "file": "public\\fonts\\poppins-700.woff2",
+    "sha256": "954fbcb9b6a5b01efa3e32043c16aba05406f5139d72d8ea71a2e2b3de1c105e",
+    "vietnamese_coverage": true,
+    "bytes": 94884
+  },
+  {
+    "weight": 800,
+    "file": "public\\fonts\\poppins-800.woff2",
+    "sha256": "8a09a9aa156b5c509ad0a4deae5dd744e6ad44b26efe4c769cab9a37eac884f7",
+    "vietnamese_coverage": true,
+    "bytes": 100544
+  }
+]

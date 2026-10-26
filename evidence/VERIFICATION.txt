@@ -1,0 +1,200 @@
+VERIFICATION · CMC Infrasec × NextFest 26
+Changed branch/field: GET /health status baseline -> ok; stages 0 -> 5. Added full five-stage game, guest persistence, separate mode leaderboards and server-authorized sticker completion code.
+MODIFIED_FILE: L:\ctf-chall\evidence\MODIFIED_FILE.py
+DIFF_FILE: L:\ctf-chall\evidence\DIFF_FILE.patch
+VERIFICATION: L:\ctf-chall\evidence\VERIFICATION.txt
+ROLLBACK: L:\ctf-chall\evidence\ROLLBACK.sh
+Original backend SHA256: e3f7c0039e35b04d6b697d7ce3a14a9ffb4d336671683cfe55fbb31263933b9f
+Modified backend SHA256: fc64c279371da482d25301559b8b540a0b808d546032b9317aaa19f7e324e0b9
+Original transcript unchanged: 26a933af4fd1fd6d7ee0f4111ffce4f78dbc51c2cd5b71303279a001abc85d37
+
+BASELINE
+COMMAND: .venv\Scripts\python.exe scripts/check_health.py evidence/baseline/backend/main.py
+INPUT: GET /health against preserved original backend
+LITERAL STDOUT:
+HTTP 200 {"status":"baseline","stages":0}
+
+LITERAL STDERR:
+
+EXIT STATUS: 0
+
+MODIFIED
+COMMAND: .venv\Scripts\python.exe scripts/check_health.py evidence/MODIFIED_FILE.py
+INPUT: GET /health against reopened modified artifact
+LITERAL STDOUT:
+HTTP 200 {"status":"ok","stages":5}
+
+LITERAL STDERR:
+
+EXIT STATUS: 0
+
+API_TESTS
+COMMAND: .venv\Scripts\python.exe -m pytest backend/tests -q
+INPUT: real Easy/Hard puzzle artifacts; temporary isolated SQLite per test
+LITERAL STDOUT:
+...........................                                              [100%]
+27 passed in 2.89s
+
+LITERAL STDERR:
+
+EXIT STATUS: 0
+
+TYPECHECK
+COMMAND: npm run typecheck
+INPUT: all TypeScript source
+LITERAL STDOUT:
+
+> dao-mat-ma@1.0.0 typecheck
+> tsc --noEmit
+
+
+LITERAL STDERR:
+
+EXIT STATUS: 0
+
+BUILD
+COMMAND: npm run build
+INPUT: Next.js production build
+LITERAL STDOUT:
+
+> dao-mat-ma@1.0.0 build
+> next build
+
+▲ Next.js 16.4.3 (Turbopack)
+✓ Running next.config.ts took 33ms
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 335ms
+  Running TypeScript ...
+  Finished TypeScript in 1296ms ...
+  Collecting page data using 5 workers ...
+  Generating static pages using 5 workers (0/3) ...
+✓ Generating static pages using 5 workers (3/3) in 317ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+└ ƒ /api/v1/[...path]
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+
+LITERAL STDERR:
+
+EXIT STATUS: 0
+
+E2E
+COMMAND: npm run test:e2e
+INPUT: production browser; Easy/Hard complete journeys; 320/375/414/768/1440, light/dark, axe
+LITERAL STDOUT:
+
+> dao-mat-ma@1.0.0 test:e2e
+> playwright test
+
+
+Running 6 tests using 1 worker
+
+  ✓  1 tests\game.spec.ts:9:5 › all learning-bench methods and input errors (7ms)
+  ✓  2 tests\game.spec.ts:56:7 › complete five-stage easy journey, reward, restart and leaderboard (4.3s)
+  ✓  3 tests\game.spec.ts:56:7 › complete five-stage hard journey, reward, restart and leaderboard (3.9s)
+  ✓  4 tests\game.spec.ts:108:5 › hints, download, journal, guide, replay and theme controls (1.3s)
+  ✓  5 tests\game.spec.ts:132:5 › proxy origin, allowlist, body limits and session isolation (287ms)
+  ✓  6 tests\game.spec.ts:143:5 › responsive light/dark, keyboard, accessibility and visual evidence (4.4s)
+
+  6 passed (17.9s)
+
+LITERAL STDERR:
+[WebServer] INFO:     Started server process [54776]
+[WebServer] INFO:     Waiting for application startup.
+[WebServer] INFO:     Application startup complete.
+[WebServer] INFO:     Uvicorn running on http://127.0.0.1:8100 (Press CTRL+C to quit)
+[WebServer] (node:49824) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+(node:26716) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+EXIT STATUS: 0
+
+NPM_AUDIT
+COMMAND: npm audit --json
+INPUT: package-lock.json including development dependencies
+LITERAL STDOUT:
+{
+  "auditReportVersion": 2,
+  "vulnerabilities": {},
+  "metadata": {
+    "vulnerabilities": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "total": 0
+    },
+    "dependencies": {
+      "prod": 23,
+      "dev": 48,
+      "optional": 61,
+      "peer": 0,
+      "peerOptional": 0,
+      "total": 108
+    }
+  }
+}
+
+LITERAL STDERR:
+
+EXIT STATUS: 0
+
+PIP_AUDIT
+COMMAND: .venv\Scripts\python.exe -m pip_audit -r backend/requirements-lock.txt --format=json
+INPUT: resolved application and test dependencies
+LITERAL STDOUT:
+{"dependencies": [{"name": "annotated-doc", "version": "0.0.5", "vulns": []}, {"name": "annotated-types", "version": "0.8.0", "vulns": []}, {"name": "anyio", "version": "4.15.1", "vulns": []}, {"name": "certifi", "version": "2026.10.23", "vulns": []}, {"name": "click", "version": "8.5.0", "vulns": []}, {"name": "colorama", "version": "0.4.6", "vulns": []}, {"name": "fastapi", "version": "0.135.1", "vulns": []}, {"name": "h11", "version": "0.16.0", "vulns": []}, {"name": "httpcore2", "version": "2.16.0", "vulns": []}, {"name": "httpcore", "version": "1.0.9", "vulns": []}, {"name": "httpx2", "version": "2.16.0", "vulns": []}, {"name": "httpx", "version": "0.28.1", "vulns": []}, {"name": "idna", "version": "3.20", "vulns": []}, {"name": "iniconfig", "version": "2.3.1", "vulns": []}, {"name": "pillow", "version": "13.0.0", "vulns": []}, {"name": "pluggy", "version": "1.7.0", "vulns": []}, {"name": "pydantic-core", "version": "2.50.1", "vulns": []}, {"name": "pydantic", "version": "2.14.1", "vulns": []}, {"name": "pygments", "version": "2.21.0", "vulns": []}, {"name": "pytest", "version": "9.1.1", "vulns": []}, {"name": "pyyaml", "version": "6.0.3", "vulns": []}, {"name": "starlette", "version": "1.9.0", "vulns": []}, {"name": "truststore", "version": "0.10.5", "vulns": []}, {"name": "typing-extensions", "version": "4.16.0", "vulns": []}, {"name": "typing-inspection", "version": "0.4.4", "vulns": []}, {"name": "uvicorn", "version": "0.41.0", "vulns": []}], "fixes": []}
+
+LITERAL STDERR:
+No known vulnerabilities found
+
+EXIT STATUS: 0
+
+OPENAPI
+COMMAND: npx --yes @redocly/cli lint docs/openapi.json --format=summary
+INPUT: OpenAPI 3.1 with cookie, Origin and CSRF contracts
+LITERAL STDOUT:
+
+LITERAL STDERR:
+validating docs\openapi.json...
+docs\openapi.json: validated in 20ms
+
+Woohoo! Your API description is valid. 🎉
+
+
+EXIT STATUS: 0
+
+ROLLBACK
+COMMAND: "C:\Program Files\Git\bin\bash.exe" evidence/ROLLBACK.sh L:/ctf-chall/evidence/rollback-copy
+INPUT: separate source copy; original hashes checked before restore
+LITERAL STDOUT:
+ROLLBACK_OK restored=17 removed=26
+
+LITERAL STDERR:
+
+EXIT STATUS: 0
+
+RESTORED
+COMMAND: .venv\Scripts\python.exe scripts/check_health.py evidence/rollback-copy/backend/main.py
+INPUT: GET /health after rollback on separate copy
+LITERAL STDOUT:
+HTTP 200 {"status":"baseline","stages":0}
+
+LITERAL STDERR:
+
+EXIT STATUS: 0
+
+Restored behavior/status: HTTP 200 {"status":"baseline","stages":0}; exit 0.
+Rollback tested on another copy; original hashes restored; untracked player-data marker preserved.
+Working backend/main.py and MODIFIED_FILE.py remain modified: HTTP 200 {"status":"ok","stages":5}.
+Only pending user input: official CMC Infrasec logo; installation target public/club-logo.png.

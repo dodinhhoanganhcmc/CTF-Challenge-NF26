@@ -1,0 +1,419 @@
+--- baseline/CONTEXT.md
++++ modified/CONTEXT.md
+@@ -8,5 +8,5 @@
+ 
+ - Organizer: CMC Infrasec; event: NextFest 26.
+ - Reward: physical club-logo sticker; a stable completion code is issued only after five solves.
+-- Official logo: pending user input; install as public/club-logo.png.
++- Official logos installed: public/club-logo.png (black primary) and public/club-logo-light.jpg (white alternative). Header/footer/reward use the matching opaque variant for the theme; preserve original artwork, aspect ratio and background. Originals are retained under assets/branding/originals/.
+ - Leaderboard: public guest name; order by solved count, points, completion duration.
+--- baseline/README.md
++++ modified/README.md
+@@ -38,15 +38,23 @@
+ 
+ Tên và điểm là dữ liệu công khai; tên có thể trùng, không phải tài khoản đã xác minh. Cookie giữ phiên 30 ngày. Đổi trình duyệt/xóa cookie mất quyền tiếp tục phiên cũ. “Chuyến đi mới” giữ hàng cũ trên BXH và tạo bộ flag mới.
+ 
+-## Logo — đầu vào duy nhất còn chờ
++## Logo chính thức đã cài
++
++Hai ảnh người dùng cung cấp được lưu nguyên byte tại `assets/branding/originals/`:
++- `club-primary-original.png`: bản chính, nền đen/chữ trắng.
++- `club-alternative-original.jpg`: bản thay thế, nền trắng/chữ đen.
++
++Bản dùng trên web là `public/club-logo.png` (PNG 1024×1024, thu nhỏ bản chính) và `public/club-logo-light.jpg` (bản JPEG thay thế nguyên gốc). Header, footer và màn nhận thưởng dùng bản trắng ở giao diện sáng, bản đen ở giao diện tối. Giữ toàn bộ bố cục vuông, không cắt, không đảo màu, không tách nền; Next.js tự tối ưu kích thước tải về.
++
++Palette sáng: trắng ngà, mực xanh rừng, biển xanh xám và CTA đất nung. Palette tối: xanh than gần đen, chữ trắng ngà và CTA cam đào. Kiểm tra contrast bằng `.\.venv\Scripts\python.exe scripts/check_palette.py`; kết quả chi tiết trong `evidence/logo-update/palette-contrast.json`.
++
++Sau khi thay ảnh trong public, chạy build và khởi động lại:
+ 
+ ```powershell
+-.\.venv\Scripts\python.exe scripts/install_logo.py "C:\duong-dan\logo-chinh-thuc.png"
++npm run build
+ .\scripts\stop.ps1
+ .\scripts\start.ps1
+ ```
+-
+-Script giữ nguyên tệp nguồn, xuất `public/club-logo.png`. Màn thưởng tự nhận logo mới; hiện dùng hình rương, không giả lập logo CLB. Nếu nhận bản vector SVG, giữ bản gốc và xuất thêm PNG để cài.
+ 
+ Mã hoàn thành `NF26-…` được server cấp sau 5 màn. Ban tổ chức kiểm tra và phát sticker trực tiếp; ứng dụng không giả định sticker đã được trao. Tra mã trên máy chủ:
+ 
+@@ -78,4 +86,4 @@
+ 
+ ## Hồ sơ bàn giao
+ 
+-`docs/session-review.md`, `docs/security-review.md`, `docs/openapi.json`, `evidence/VERIFICATION.txt`, `evidence/DIFF_FILE.patch`, `evidence/ROLLBACK.sh`. Bản gốc cùng hash nằm trong `evidence/baseline/` và `evidence/original-hashes.json`. Rollback chỉ khôi phục mã nguồn, không xóa SQLite, logo được gửi sau hay dữ liệu người chơi.
++`docs/session-review.md`, `docs/security-review.md`, `docs/openapi.json`, `evidence/logo-update/VERIFICATION.txt`, `evidence/logo-update/DIFF_FILE.patch`, `evidence/logo-update/ROLLBACK.sh`. Bản gốc cùng hash nằm trong `evidence/baseline/` và `evidence/original-hashes.json`. Rollback chỉ khôi phục mã nguồn, không xóa SQLite, logo được gửi sau hay dữ liệu người chơi.
+--- baseline/app/globals.css
++++ modified/app/globals.css
+@@ -8,8 +8,8 @@
+   --color-coral: var(--coral);
+   --color-ocean: var(--ocean);
+ }
+-:root { --paper:#f8f6ef; --panel:#fffef9; --ink:#183e38; --muted:#536b64; --coral:#b43e25; --coral-bright:#ed7854; --ocean:#e1efeb; --land:#c7d9bc; --line:#ccdbd0; --soft:#edf0e4; --focus:#126c8a; --success:#246644; --error:#a42f25; --shadow:0 22px 60px #183e3814; color-scheme:light; }
+-:root[data-theme='dark'] { --paper:#132823; --panel:#1c352e; --ink:#f2f1e4; --muted:#b2c8bc; --coral:#ffac8e; --coral-bright:#f39e78; --ocean:#1c3b36; --land:#365647; --line:#456459; --soft:#294438; --focus:#96dcec; --success:#a5e6bc; --error:#ffb4a8; --shadow:0 22px 60px #0002; color-scheme:dark; }
++:root { --paper:#f6f7f3; --panel:#ffffff; --ink:#18382f; --muted:#4f665d; --coral:#ad3b25; --coral-bright:#ed7854; --ocean:#e4eee8; --land:#c4d6bc; --line:#c9d8cf; --control-border:#748a80; --soft:#edf1e9; --focus:#126c8a; --success:#246644; --error:#a42f25; --shadow:0 22px 60px #183e3814; color-scheme:light; }
++:root[data-theme='dark'] { --paper:#0e1915; --panel:#172720; --ink:#f2f5ef; --muted:#b5c9bb; --coral:#ffb08f; --coral-bright:#f39e78; --ocean:#1a342a; --land:#355442; --line:#405e4d; --control-border:#789b86; --soft:#233d2d; --focus:#96dcec; --success:#a5e6bc; --error:#ffb4a8; --shadow:0 22px 60px #0002; color-scheme:dark; }
+ * { box-sizing:border-box; }
+ html { scroll-behavior:smooth; }
+ body { margin:0; background:var(--paper); color:var(--ink); font:14px/1.65 'Plus Jakarta Sans Variable',sans-serif; }
+@@ -28,7 +28,7 @@
+ svg { flex-shrink:0; }
+ .site-header { min-height:89px; display:flex; align-items:center; gap:28px; padding:18px max(32px,calc((100vw - 1400px)/2)); border-bottom:1.5px solid var(--ink); }
+ .brand { display:flex; align-items:center; gap:10px; text-decoration:none; font-family:'Bricolage Grotesque Variable',sans-serif; font-size:21px; font-weight:800; line-height:1.1; letter-spacing:-.7px; }
+-.brand-icon { width:43px; height:43px; border:1.5px solid var(--ink); border-radius:50%; display:grid; place-items:center; background:var(--soft); }
++
+ .brand-sub { font:600 9px/1.8 'Plus Jakarta Sans Variable',sans-serif; display:block; letter-spacing:1.1px; margin-top:3px; }
+ .site-header nav { display:flex; margin-left:auto; gap:27px; }
+ .site-header nav button { display:flex; gap:7px; align-items:center; font-weight:600; font-size:12px; padding:8px 0; }
+@@ -104,7 +104,7 @@
+ .objective svg { color:var(--coral); margin-top:2px; }
+ .objective p { font-size:11px; line-height:1.8; }
+ label { display:block; font-size:11px; font-weight:650; margin-bottom:7px; }
+-input,textarea,select { width:100%; min-width:0; border:1px solid var(--line); background:var(--panel); color:var(--ink); border-radius:6px; padding:11px 12px; outline:none; }
++input,textarea,select { width:100%; min-width:0; border:1px solid var(--control-border); background:var(--panel); color:var(--ink); border-radius:6px; padding:11px 12px; outline:none; }
+ input::placeholder,textarea::placeholder { color:var(--muted); opacity:.85; }
+ textarea { resize:vertical; font:11px/1.85 ui-monospace,monospace; }
+ .clue-heading { display:flex; align-items:center; justify-content:space-between; margin-bottom:2px; }
+@@ -114,10 +114,10 @@
+ .flag-form { margin-top:22px; }
+ .flag-form input { font:12px/1.6 ui-monospace,monospace; }
+ .button { display:inline-flex; align-items:center; justify-content:center; gap:12px; padding:12px 18px; border:1px solid var(--coral); border-radius:6px; background:var(--coral); color:var(--panel); font-size:12px; font-weight:700; line-height:1.5; min-height:44px; }
+-:root[data-theme='dark'] .button { color:#183e38; }
++:root[data-theme='dark'] .button:not(.secondary) { color:#183e38; }
+ .button:hover:not(:disabled) { filter:brightness(.93); transform:translateY(-1px); }
+ .button.full { display:flex; width:100%; margin-top:11px; justify-content:space-between; }
+-.button.secondary { border-color:var(--line); background:var(--panel); color:var(--ink); }
++.button.secondary { border-color:var(--control-border); background:var(--panel); color:var(--ink); }
+ .button.small-button { font-size:10px; padding:8px 10px; min-height:38px; }
+ .button svg { width:18px; height:18px; }
+ .button-row { display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; margin-top:14px; }
+@@ -209,8 +209,48 @@
+ @media(min-width:1500px) { .site-header { padding-left:calc((100vw - 1336px)/2); padding-right:calc((100vw - 1336px)/2); } }
+ @media(max-width:1100px) { .site-header nav { gap:15px; } .expedition-note { min-width:250px; padding-left:25px; } .game-columns { grid-template-columns:minmax(0,1.3fr) minmax(330px,1fr); } .map-node { min-width:78px; } .node-name { font-size:8px; } .node-weight { font-size:7px; } .map-coordinate { display:none; } .mission-panel { padding:23px; } .game-toolbar { padding:13px 20px; } }
+ @media(max-width:900px) { .site-header { padding:16px 24px; gap:16px; } .brand { font-size:18px; } .site-header nav { gap:18px; } .site-header nav button span { display:none; } .site-header nav svg { width:21px; height:21px; } main,footer { padding-left:24px; padding-right:24px; } .intro { padding:40px 0 30px; gap:35px; } .intro h1 { font-size:58px; } .expedition-note { min-width:210px; padding-left:25px; } .expedition-note p { font-size:20px; } .expedition-note .eyebrow { font-size:7px; letter-spacing:1px; } .game-columns { grid-template-columns:1fr; } .mission-panel { border-left:0; border-top:1px solid var(--line); padding:28px; } .map-top { padding-top:24px; } .island-map { min-height:360px; } .node-name { font-size:10px; } .node-weight { font-size:8px; } .mission-panel h2 { font-size:34px; } .mission-story,.objective p { font-size:13px; } .onboarding { max-width:420px; margin:auto; padding:15px 0; } .onboarding h2 { font-size:38px; } .onboarding .welcome-icon { margin-top:24px; } .below-map { align-items:flex-start; } .below-map > span { max-width:430px; } .mission-panel .eyebrow { font-size:10px; } .mission-panel .category { font-size:10px; } .clue-heading label { font-size:9px; } .flag-form input { font-size:14px; } .button { font-size:13px; } .bench summary { font-size:13px; } .bench summary .small { font-size:10px; } }
+-@media(max-width:600px) { body { font-size:13px; } .site-header { min-height:74px; padding:13px 16px; gap:12px; } .brand { font-size:15px; gap:7px; letter-spacing:-.4px; } .brand-icon { width:31px; height:31px; } .brand-icon svg { width:23px; } .brand-sub { font-size:6.5px; letter-spacing:.6px; } .site-header nav { gap:6px; } .site-header nav button { width:32px; height:36px; padding:4px; justify-content:center; } .site-header nav svg { width:19px; height:19px; } .theme-switch { width:30px; height:30px; } main,footer { padding-left:16px; padding-right:16px; } .intro { padding:31px 0 27px; } .intro .eyebrow { font-size:7px; letter-spacing:1.1px; } .intro h1 { font-size:49px; letter-spacing:-2.4px; margin:16px 0; } .intro-copy { font-size:12px; line-height:1.85; max-width:350px; } .expedition-note { display:none; } .game-shell { border-radius:10px; } .game-toolbar { flex-wrap:wrap; padding:12px 14px; gap:10px; } .mode-switch { flex:1; } .mode-switch button { flex:1; justify-content:center; padding:7px 8px; font-size:11px; gap:6px; } .mode-switch button span { font-size:9px; } .player-chip { width:100%; justify-content:space-between; } .player-chip .score { margin-left:auto; } .player-chip > span { font-size:9px; } .map-top { padding:20px 18px 15px; } .map-top h2 { font-size:24px; } .map-top .eyebrow { font-size:8px; } .island-map { display:none; } .mobile-route { display:flex; flex-direction:column; list-style:none; padding:0 18px; margin:0 0 15px; gap:7px; } .mobile-route button { width:100%; display:flex; align-items:center; text-align:left; gap:12px; padding:12px 13px; border:1px solid var(--line); border-radius:7px; background:color-mix(in srgb,var(--panel) 65%,var(--ocean)); } .mobile-route button.selected { border-color:var(--coral); background:var(--panel); box-shadow:inset 3px 0 0 var(--coral); } .mobile-route button > span { flex:1; font-size:12px; font-weight:650; } .mobile-route small { display:block; font:8px/1.6 ui-monospace,monospace; color:var(--muted); margin-bottom:2px; } .mobile-route button > svg:last-child { width:17px; } .fragment-bar { margin:0 18px; padding:15px 0; } .fragment-bar p { font-size:10px; } .fragments { gap:4px; } .fragments span { width:23px; height:27px; font-size:8px; } .fragments svg { width:13px; } .treasure-strip { padding:16px 18px; gap:10px; } .treasure-strip strong { font-size:14px; line-height:1.4; } .treasure-strip small { font-size:8px; } .treasure-strip > svg:first-child { width:24px; } .treasure-strip > svg:last-child { width:17px; } .mission-panel { padding:23px 18px; } .mission-panel h2 { font-size:29px; } .mission-story { font-size:12px; } .mission-top .eyebrow { font-size:8px; } .mission-top .category { font-size:8px; } .objective p { font-size:11px; } .objective { padding:10px; } .onboarding h2 { font-size:36px; } .bench summary { font-size:11px; } .bench summary .small { font-size:8px; } .hints small { font-size:9px; } .below-map { flex-direction:column; gap:12px; padding:21px 0; } .below-map > span { align-items:flex-start; font-size:10px; } .below-map > span > svg { width:18px; } footer { padding-top:33px; } footer > p { font-size:36px; } .footer-bottom { flex-wrap:wrap; gap:11px; font-size:9px; } .footer-bottom > span:nth-child(2) { width:100%; order:3; } .modal { padding:20px; width:calc(100% - 24px); max-height:calc(100dvh - 24px); } .modal-heading h2 { font-size:24px; } .modal p { font-size:11px; } .modal .lead { font-size:14px; } .guide-steps li { font-size:11px; } .reward h3 { font-size:27px; } .reward-illustration { width:120px; height:120px; } }
+-@media(max-width:360px) { .site-header { gap:4px; padding-left:12px; padding-right:12px; } .brand { font-size:13px; } .brand-sub { font-size:5.5px; } .brand-icon { width:26px; height:26px; } .site-header nav { gap:1px; } .site-header nav button { width:27px; } .theme-switch { width:27px; } .intro h1 { font-size:43px; } .mode-switch button span { display:none; } .fragment-bar { flex-wrap:wrap; } .mission-panel { padding:21px 14px; } .mission-top { flex-wrap:wrap; } }
++@media(max-width:600px) { body { font-size:13px; } .site-header { min-height:74px; padding:13px 16px; gap:12px; } .brand { font-size:15px; gap:7px; letter-spacing:-.4px; } .brand-sub { font-size:6.5px; letter-spacing:.6px; } .site-header nav { gap:6px; } .site-header nav button { width:32px; height:36px; padding:4px; justify-content:center; } .site-header nav svg { width:19px; height:19px; } .theme-switch { width:30px; height:30px; } main,footer { padding-left:16px; padding-right:16px; } .intro { padding:31px 0 27px; } .intro .eyebrow { font-size:7px; letter-spacing:1.1px; } .intro h1 { font-size:49px; letter-spacing:-2.4px; margin:16px 0; } .intro-copy { font-size:12px; line-height:1.85; max-width:350px; } .expedition-note { display:none; } .game-shell { border-radius:10px; } .game-toolbar { flex-wrap:wrap; padding:12px 14px; gap:10px; } .mode-switch { flex:1; } .mode-switch button { flex:1; justify-content:center; padding:7px 8px; font-size:11px; gap:6px; } .mode-switch button span { font-size:9px; } .player-chip { width:100%; justify-content:space-between; } .player-chip .score { margin-left:auto; } .player-chip > span { font-size:9px; } .map-top { padding:20px 18px 15px; } .map-top h2 { font-size:24px; } .map-top .eyebrow { font-size:8px; } .island-map { display:none; } .mobile-route { display:flex; flex-direction:column; list-style:none; padding:0 18px; margin:0 0 15px; gap:7px; } .mobile-route button { width:100%; display:flex; align-items:center; text-align:left; gap:12px; padding:12px 13px; border:1px solid var(--line); border-radius:7px; background:color-mix(in srgb,var(--panel) 65%,var(--ocean)); } .mobile-route button.selected { border-color:var(--coral); background:var(--panel); box-shadow:inset 3px 0 0 var(--coral); } .mobile-route button > span { flex:1; font-size:12px; font-weight:650; } .mobile-route small { display:block; font:8px/1.6 ui-monospace,monospace; color:var(--muted); margin-bottom:2px; } .mobile-route button > svg:last-child { width:17px; } .fragment-bar { margin:0 18px; padding:15px 0; } .fragment-bar p { font-size:10px; } .fragments { gap:4px; } .fragments span { width:23px; height:27px; font-size:8px; } .fragments svg { width:13px; } .treasure-strip { padding:16px 18px; gap:10px; } .treasure-strip strong { font-size:14px; line-height:1.4; } .treasure-strip small { font-size:8px; } .treasure-strip > svg:first-child { width:24px; } .treasure-strip > svg:last-child { width:17px; } .mission-panel { padding:23px 18px; } .mission-panel h2 { font-size:29px; } .mission-story { font-size:12px; } .mission-top .eyebrow { font-size:8px; } .mission-top .category { font-size:8px; } .objective p { font-size:11px; } .objective { padding:10px; } .onboarding h2 { font-size:36px; } .bench summary { font-size:11px; } .bench summary .small { font-size:8px; } .hints small { font-size:9px; } .below-map { flex-direction:column; gap:12px; padding:21px 0; } .below-map > span { align-items:flex-start; font-size:10px; } .below-map > span > svg { width:18px; } footer { padding-top:33px; } footer > p { font-size:36px; } .footer-bottom { flex-wrap:wrap; gap:11px; font-size:9px; } .footer-bottom > span:nth-child(2) { width:100%; order:3; } .modal { padding:20px; width:calc(100% - 24px); max-height:calc(100dvh - 24px); } .modal-heading h2 { font-size:24px; } .modal p { font-size:11px; } .modal .lead { font-size:14px; } .guide-steps li { font-size:11px; } .reward h3 { font-size:27px; } .reward-illustration { width:120px; height:120px; } }
++@media(max-width:360px) { .site-header { gap:4px; padding-left:12px; padding-right:12px; } .brand { font-size:13px; } .brand-sub { font-size:5.5px; } .site-header nav { gap:1px; } .site-header nav button { width:27px; } .theme-switch { width:27px; } .intro h1 { font-size:43px; } .mode-switch button span { display:none; } .fragment-bar { flex-wrap:wrap; } .mission-panel { padding:21px 14px; } .mission-top { flex-wrap:wrap; } }
+ @media(prefers-reduced-motion:reduce) { *,*::before,*::after { animation:none!important; transition:none!important; scroll-behavior:auto!important; } }
+ 
+ @media(max-width:900px) { .awaiting-captain .mission-panel { order:-1; border-top:0; border-bottom:1px solid var(--line); } }
++
++/* Official opaque artwork: no inversion, blend modes, transparency extraction or cropping. */
++.club-logo { display:inline-block; flex-shrink:0; width:88px; height:88px; overflow:hidden; border:1px solid var(--line); border-radius:5px; background:#fff; line-height:0; }
++.club-logo img { width:100%; height:100%; object-fit:contain; filter:none; mix-blend-mode:normal; }
++.club-logo .club-logo-light { display:block; }
++.club-logo .club-logo-dark { display:none; }
++:root[data-theme='dark'] .club-logo { background:#020202; }
++:root[data-theme='dark'] .club-logo .club-logo-light { display:none; }
++:root[data-theme='dark'] .club-logo .club-logo-dark { display:block; }
++.site-header { min-height:113px; padding-top:12px; padding-bottom:12px; }
++.brand { gap:16px; }
++.footer-organizer { display:flex; align-items:center; gap:18px; }
++.club-logo-footer { width:112px; height:112px; }
++.reward-illustration:has(.club-logo) { width:248px; height:248px; border:0; border-radius:0; background:none; transform:none; margin-bottom:22px; }
++.club-logo-reward { width:100%; height:100%; }
++.reward-illustration .club-logo img { width:100%; height:100%; object-fit:contain; }
++.theme-switch { border-color:var(--control-border); }
++@media(max-width:600px) {
++ .site-header { flex-wrap:wrap; min-height:95px; gap:8px; padding-top:12px; padding-bottom:12px; }
++ .brand { gap:11px; }
++ .club-logo-header { width:68px; height:68px; }
++ .brand-sub { font-size:7px; letter-spacing:.7px; }
++ .site-header nav { gap:4px; }
++ .site-header nav button { width:30px; }
++ .reward-illustration:has(.club-logo) { width:216px; height:216px; }
++ .footer-organizer { gap:12px; }
++}
++@media(max-width:460px) {
++ .site-header .brand { flex:1 0 calc(100% - 42px); }
++ .site-header .theme-switch { order:1; margin-left:auto; }
++ .site-header nav { order:2; margin-left:79px; gap:14px; }
++ .site-header nav button { width:auto; height:32px; gap:5px; padding:4px 0; }
++ .site-header nav button span { display:inline; font-size:9px; }
++ .site-header nav svg { width:14px; height:14px; }
++ .intro .eyebrow { line-height:1.9; }
++}
++@media(max-width:360px) {
++ .site-header nav { margin-left:0; width:100%; justify-content:space-between; gap:9px; }
++ .site-header nav button span { font-size:10px; }
++}
+--- baseline/backend/tests/test_game.py
++++ modified/backend/tests/test_game.py
+@@ -222,3 +222,11 @@
+     with sqlite3.connect(path) as db:
+         db.execute("UPDATE limits SET count=3000 WHERE key LIKE 'new:%'")
+     assert c.post('/api/v1/session', json={'name': 'Over limit'}).status_code == 429
++
++
++def test_installed_official_web_logos_are_opaque_and_square():
++    root = Path(__file__).resolve().parents[2]
++    for filename in ('club-logo.png', 'club-logo-light.jpg'):
++        with Image.open(root / 'public' / filename) as logo:
++            assert logo.size == (1024, 1024)
++            assert logo.convert('RGBA').getchannel('A').getextrema() == (255, 255)
+--- baseline/components/club-logo.tsx
++++ modified/components/club-logo.tsx
+@@ -0,0 +1,10 @@
++import Image from 'next/image';
++
++/** Opaque, unaltered artwork: the light/dark variants always keep their own background. */
++export default function ClubLogo({ placement = 'header' }: { placement?: 'header' | 'footer' | 'reward' }) {
++  const sizes = placement === 'reward' ? '(max-width: 600px) 216px, 248px' : placement === 'footer' ? '112px' : '(max-width: 600px) 68px, 88px';
++  return <span className={`club-logo club-logo-${placement}`} data-testid={`club-logo-${placement}`}>
++    <Image className="club-logo-light" src="/club-logo-light.jpg?v=20261026" alt="Logo CMC Infrasec" width={1024} height={1024} sizes={sizes} loading={placement === 'header' ? 'eager' : 'lazy'} />
++    <Image className="club-logo-dark" src="/club-logo.png?v=20261026" alt="Logo CMC Infrasec" width={1024} height={1024} sizes={sizes} loading={placement === 'header' ? 'eager' : 'lazy'} />
++  </span>;
++}
+--- baseline/components/game.tsx
++++ modified/components/game.tsx
+@@ -3,6 +3,7 @@
+ import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
+ import { ArrowRightIcon, ArrowDownIcon, CompassIcon, MapTrifoldIcon, FlagIcon, LockKeyIcon, CheckIcon, TreasureChestIcon, FlaskIcon, TreeIcon, BinocularsIcon, LighthouseIcon, MountainsIcon, SunIcon, MoonIcon, BookOpenIcon, TrophyIcon, XIcon, DownloadSimpleIcon, LightbulbIcon, CopyIcon, SparkleIcon, CircleNotchIcon, ArrowCounterClockwiseIcon } from '@phosphor-icons/react';
+ import { api, decode, message, type Clue, type Entry, type Mode, type Reward, type Session, type Stage } from '@/lib/game';
++import ClubLogo from '@/components/club-logo';
+ 
+ const icons = [FlaskIcon, TreeIcon, BinocularsIcon, LighthouseIcon, MountainsIcon];
+ const positions = [{ left: '15%', top: '66%' }, { left: '34%', top: '33%' }, { left: '53%', top: '62%' }, { left: '72%', top: '29%' }, { left: '87%', top: '60%' }];
+@@ -167,7 +168,7 @@
+   return <>
+     <a className="skip-link" href="#mission">Đến nhiệm vụ</a>
+     <header className="site-header">
+-      <a className="brand" href="/" aria-label="Đảo Mật Mã · Trang chính"><span className="brand-icon"><CompassIcon size={27} weight="duotone" /></span><span>ĐẢO MẬT MÃ<span className="brand-sub">CMC INFRASEC / NEXTFEST 26</span></span></a>
++      <a className="brand" href="/" aria-label="Đảo Mật Mã · CMC Infrasec · Trang chính"><ClubLogo /><span>ĐẢO MẬT MÃ<span className="brand-sub">NEXTFEST 26 / TREASURE HUNT</span></span></a>
+       <nav aria-label="Điều hướng chính"><button aria-label="Cách chơi" onClick={() => setPanel('guide')}><BookOpenIcon /> <span>Cách chơi</span></button><button aria-label="Bảng xếp hạng" onClick={openBoard}><TrophyIcon /> <span>Bảng xếp hạng</span></button><button aria-label="Nhật ký" onClick={() => setPanel('journal')}><MapTrifoldIcon /> <span>Nhật ký</span></button></nav>
+       <button className="icon-button theme-switch" aria-label={dark ? 'Bật giao diện sáng' : 'Bật giao diện tối'} onClick={() => {
+         const value = !dark; setDark(value); document.documentElement.dataset.theme = value ? 'dark' : 'light'; localStorage.setItem('island-theme', value ? 'dark' : 'light');
+@@ -176,7 +177,7 @@
+ 
+     <main>
+       <section className="intro" aria-labelledby="title">
+-        <div><p className="eyebrow"><span className="live-dot" /> CMC INFRASEC PRESENTS · NEXTFEST 26</p>
++        <div><p className="eyebrow"><span className="live-dot" /> NEXTFEST 26 · CHUYẾN ĐI CỦA NHỮNG NGƯỜI TÒ MÒ</p>
+           <h1 id="title">Một hòn đảo.<br />Năm điều <span>bí mật.</span></h1>
+           <p className="intro-copy">Không cần là hacker để bắt đầu. Lần theo manh mối, giải những mật mã đầu tiên — và tìm kho báu của riêng bạn.</p>
+         </div>
+@@ -244,14 +245,14 @@
+ 
+       <section className="below-map"><span><SparkleIcon size={22} /><strong>Học bằng cách khám phá.</strong> Mỗi màn là một kỹ năng, không phải bài kiểm tra.</span><button className="text-button" onClick={() => setPanel('guide')}>Đọc sổ tay tân binh <ArrowRightIcon /></button></section>
+     </main>
+-    <footer><p>Ai cũng có một<br /><span>lần đầu phá mã.</span></p><div className="footer-bottom"><span>CMC Infrasec <span className="muted">× NextFest 26</span></span><span>5 bí mật. 1 chuyến đi đáng nhớ.</span>{guest && <button className="text-button" onClick={() => setPanel('replay')}><ArrowCounterClockwiseIcon /> Chuyến đi mới</button>}</div></footer>
++    <footer><p>Ai cũng có một<br /><span>lần đầu phá mã.</span></p><div className="footer-bottom"><span className="footer-organizer"><ClubLogo placement="footer" /><span className="muted">× NextFest 26</span></span><span>5 bí mật. 1 chuyến đi đáng nhớ.</span>{guest && <button className="text-button" onClick={() => setPanel('replay')}><ArrowCounterClockwiseIcon /> Chuyến đi mới</button>}</div></footer>
+ 
+     {panel && <Modal title={{ guide: 'Sổ tay tân binh', journal: 'Nhật ký thám hiểm', leaderboard: 'Bảng xếp hạng', replay: 'Bắt đầu chuyến đi mới?', treasure: 'Kho báu của bạn!' }[panel]} onClose={() => setPanel(null)}>
+       {panel === 'guide' && <div className="guide-content"><p className="lead">CTF là trò tìm “lá cờ” — một chuỗi ký tự bí mật ẩn trong dữ liệu.</p><ol className="guide-steps"><li><strong>Đọc manh mối.</strong> Mỗi địa điểm dạy một kỹ năng mới. Easy có công cụ và ví dụ HELLO để bạn thử trước.</li><li><strong>Tìm chuỗi <code>DAO{'{...}'}</code>.</strong> Sao chép đủ dấu ngoặc, giữ nguyên chữ hoa. Không cần cài phần mềm khi chơi Easy.</li><li><strong>Nộp flag và ghép la bàn.</strong> Đúng thì mở địa điểm mới. Sai thì thử lại; điểm không bị trừ.</li><li><strong>Đến kho báu.</strong> Giải đủ năm màn rồi đưa mã hoàn thành cho ban tổ chức để nhận sticker logo CMC Infrasec tại NextFest 26.</li></ol><div className="guide-note"><h3>Điểm & độ khó</h3><p>Weight 2 → 10 là độ khó tương đối. Điểm mỗi màn = weight × 100 − 25 × số gợi ý. Tối đa 3.000 điểm mỗi mode. BXH ưu tiên số màn → điểm → thời gian hoàn thành.</p><p>Easy và Hard lưu tiến độ riêng. Tên có thể trùng; cookie mới là định danh. Giữ cookie để tiếp tục chuyến đi.</p></div><button className="button full" onClick={() => setPanel(null)}>Đã hiểu, lên đường thôi! <ArrowRightIcon /></button></div>}
+       {panel === 'journal' && <div><p className="muted">Những điều bạn đã khám phá · {mode === 'easy' ? 'Easy' : 'Hard'}</p>{!solved.length ? <div className="empty-state"><BookOpenIcon size={38} /><p>Trang đầu vẫn còn trống.<br />Giải manh mối đầu tiên để viết câu chuyện của bạn.</p></div> : <ol className="journal-list">{stages.filter(s => solved.includes(s.id)).map(s => <li key={s.id}><CheckIcon /><div><strong>{s.location}</strong><p>{s.category} · Đã thu thập mảnh 0{s.id}</p><button className="text-button" onClick={() => { choose(s.id); setPanel(null); }}>Đọc lại bài học <ArrowRightIcon /></button></div></li>)}</ol>}</div>}
+       {panel === 'leaderboard' && <><div className="board-toolbar"><p>{mode === 'easy' ? 'Easy · Khởi đầu' : 'Hard · Thử sức'}</p><button className="text-button" onClick={() => changeMode(mode === 'easy' ? 'hard' : 'easy')}>Xem {mode === 'easy' ? 'Hard' : 'Easy'} <ArrowRightIcon /></button></div><p className="small">Số màn → điểm → thời gian hoàn thành. Tên guest có thể trùng.</p>{!panelLoading && !panelError && (entries.length ? <div className="table-scroll"><table><caption className="sr-only">Thứ hạng người chơi {mode}</caption><thead><tr><th>#</th><th>Thuyền trưởng</th><th>Mảnh</th><th>Điểm</th><th>Thời gian</th></tr></thead><tbody>{entries.map((e, i) => <tr key={i}><td>{boardOffset + i + 1}</td><td>{e.name}</td><td>{e.solved}/5</td><td>{e.points}</td><td>{e.seconds === null ? 'Đang chơi' : `${Math.floor(e.seconds / 60)}p ${e.seconds % 60}s`}</td></tr>)}</tbody></table></div> : <div className="empty-state"><TrophyIcon size={38} /><p>Chưa có thuyền trưởng nào trên bảng.<br />Giải màn đầu tiên để ghi tên bạn!</p></div>)}<div className="button-row"><button className="button secondary small-button" disabled={boardOffset === 0 || panelLoading} onClick={() => setBoardOffset(v => Math.max(0, v - 20))}>Trang trước</button><span className="small">{boardTotal} chuyến đi</span><button className="button secondary small-button" disabled={boardOffset + 20 >= boardTotal || panelLoading} onClick={() => setBoardOffset(v => v + 20)}>Trang sau</button></div></>}
+       {panel === 'replay' && <><p>Tiến độ và điểm hiện tại vẫn giữ trên BXH, nhưng trình duyệt sẽ chuyển sang một chuyến đi mới với flag mới. Chuyến cũ sẽ không còn truy cập bằng cookie này.</p><p>Tên hiển thị: <strong>{guest?.name}</strong></p><div className="button-row"><button className="button secondary" onClick={() => setPanel(null)}>Ở lại chuyến này</button><button className="button" disabled={busy} onClick={() => enter(undefined, true)}>Tạo chuyến mới <ArrowRightIcon /></button></div>{error && <p className="error" role="alert">{error}</p>}</>}
+-      {panel === 'treasure' && reward && !panelLoading && !panelError && <div className="reward"><span className="reward-illustration">{reward.logo_ready ? <img src="/club-logo.png" alt="Logo CMC Infrasec" width={120} height={120} /> : <TreasureChestIcon size={85} weight="duotone" />}</span><p className="eyebrow">CMC INFRASEC × NEXTFEST 26</p><h3>Bạn đã phá đủ 5 mật mã.</h3><p><strong>{reward.name}</strong>, một sticker logo CMC Infrasec đang chờ bạn tại NextFest 26.</p><div className="reward-code"><span className="eyebrow">MÃ HOÀN THÀNH</span><strong data-testid="reward-code">{reward.code}</strong><button className="text-button" onClick={() => copy(reward.code)}><CopyIcon /> Sao chép mã</button></div><p>{reward.instruction}</p><p className="small">{mode === 'easy' ? 'Easy' : 'Hard'} · {progress?.points} điểm · {Math.floor(reward.seconds / 60)}p {reward.seconds % 60}s</p><p className="copy-status" role="status">{copied}</p><button className="button full" onClick={openBoard}>Ghi dấu trên bảng xếp hạng <TrophyIcon /></button></div>}
++      {panel === 'treasure' && reward && !panelLoading && !panelError && <div className="reward"><span className="reward-illustration">{reward.logo_ready ? <ClubLogo placement="reward" /> : <TreasureChestIcon size={85} weight="duotone" />}</span><p className="eyebrow">NEXTFEST 26 / KHO BÁU CỦA BẠN</p><h3>Bạn đã phá đủ 5 mật mã.</h3><p><strong>{reward.name}</strong>, một sticker logo CMC Infrasec đang chờ bạn tại NextFest 26.</p><div className="reward-code"><span className="eyebrow">MÃ HOÀN THÀNH</span><strong data-testid="reward-code">{reward.code}</strong><button className="text-button" onClick={() => copy(reward.code)}><CopyIcon /> Sao chép mã</button></div><p>{reward.instruction}</p><p className="small">{mode === 'easy' ? 'Easy' : 'Hard'} · {progress?.points} điểm · {Math.floor(reward.seconds / 60)}p {reward.seconds % 60}s</p><p className="copy-status" role="status">{copied}</p><button className="button full" onClick={openBoard}>Ghi dấu trên bảng xếp hạng <TrophyIcon /></button></div>}
+       {panelLoading && <p className="loading-line" role="status"><CircleNotchIcon className="spin" /> Đang mở hải đồ…</p>}
+       {panelError && <div className="error" role="alert">{panelError}<button className="text-button" onClick={() => setRetry(r => r + 1)}>Thử lại</button></div>}
+     </Modal>}
+--- baseline/docs/session-review.md
++++ modified/docs/session-review.md
+@@ -22,6 +22,6 @@
+ 
+ Hoàn thiện API có kiểm tra phiên/CSRF/Origin, SQLite giao dịch, khóa màn và flag theo phiên; frontend bản đồ; bảng xếp hạng; công cụ giải mã; hướng dẫn; nhật ký; theme; artifact PNG/log; màn thưởng và tra mã cục bộ. Có script khởi động/dừng, hướng dẫn cài logo, test và hồ sơ rollback.
+ 
+-## Dữ liệu còn chờ
++## Logo — cập nhật 2026-10-26
+ 
+-Chỉ còn logo chính thức. Điểm lắp: `public/club-logo.png`. Script `scripts/install_logo.py` chuẩn hóa ảnh mà không thay đổi nguồn. Không có logo giả hay tài sản thương hiệu tự dựng.
++Người dùng đã cung cấp logo chính nền đen/chữ trắng và bản thay thế nền trắng/chữ đen. Đã lưu nguyên bản trong `assets/branding/originals/`, cài bản web tại `public/club-logo.png` và `public/club-logo-light.jpg`, tích hợp theme vào header/footer/màn thưởng. Không còn thiếu asset logo. Bằng chứng cập nhật nằm trong `evidence/logo-update/`.
+--- baseline/docs/superpowers/specs/2026-10-24-treasure-ctf-design.md
++++ modified/docs/superpowers/specs/2026-10-24-treasure-ctf-design.md
+@@ -27,4 +27,4 @@
+ No undecided functional requirements. Deployment assumptions documented; no multi-tenant accounts or paid AI model added. Guest names and separate mode leaderboards were subsequently requested and are included. Puzzle scope deliberately beginner-level.
+ 
+ ## Confirmed continuation
+-Organizer: CMC Infrasec. NextFest 26 reward: club-logo sticker after five solves. Official logo is the only pending user-supplied asset. A completion code is available for local organizer lookup; physical handout remains in person.
++Organizer: CMC Infrasec. NextFest 26 reward: club-logo sticker after five solves. Official primary and alternative logos were supplied on 2026-10-26 and installed with theme-aware opaque rendering. A completion code is available for local organizer lookup; physical handout remains in person.
+--- baseline/docs/visual-direction.md
++++ modified/docs/visual-direction.md
+@@ -4,3 +4,11 @@
+ Challenger verdicts: Swiss poster wall competitive for clarity, but weaker adventure identification; mezzotint declined on readability and familiarity; aircraft gauges declined because there is no telemetry; ebru declined because liquid patterns do not express sequence; glazier wall declined because destinations need a route; moon-shadow bazaar declined because commerce conflicts with treasure discovery.
+ Raises: Swiss grid discipline aligns mission and legend; mezzotint contrast discipline gives every state a readable contour; aircraft cross-check discipline reconciles fragment count with server state; ebru commitment keeps one visual world; glazier explicit state grammar distinguishes locked/current/solved; bazaar continuity keeps a debrief attached to every earned fragment.
+ Nav N7 rounded slab; footer Ft5 statement. Map / Diagram macrostructure; Hum interpreted for this adventure. No marketing claims. Motion communicates a new fragment and map selection only; reduced motion removes spatial transitions. Mobile map becomes an ordered destination strip and mission stack, preserving access without tiny labels.
++
++## Official branding / 2026-10-26
++
++The supplied logos are complete square compositions with opaque backgrounds. Keep their full framing and all original pixels; do not cut out the globe or invert/recolor the artwork. Use the black primary in dark mode, white alternative in light mode. Header mark: 88px desktop / 68px mobile; footer: 112px; reward: 248px desktop / 216px mobile. The large reward treatment keeps the detailed club composition legible. Logos sit in square, lightly outlined plates, never a circular crop.
++
++Light tokens: paper #F6F7F3; panel #FFFFFF; ink #18382F; muted #4F665D; ocean #E4EEE8; CTA #AD3B25. Dark tokens: paper #0E1915; panel #172720; ink #F2F5EF; muted #B5C9BB; ocean #1A342A; CTA #FFB08F. Restrained forest/stone colors retain the approved adventure direction and support the monochrome branding. Warm CTA is the only dominant action accent.
++
++Contrast gate checks 34 token pairs: normal text at least 4.5:1 and field/focus boundaries at least 3:1. Measured minima: text 5.16:1, UI 3.69:1. Browser axe checks additionally cover rendered layouts, both themes, mission and reward. Keep dark secondary-button labels light rather than applying the primary-button dark label override.
+--- baseline/next.config.ts
++++ modified/next.config.ts
+@@ -1,6 +1,12 @@
+ import type { NextConfig } from 'next';
+ const config: NextConfig = {
+   poweredByHeader: false,
++  images: {
++    localPatterns: [
++      { pathname: '/club-logo.png', search: '?v=20261026' },
++      { pathname: '/club-logo-light.jpg', search: '?v=20261026' },
++    ],
++  },
+   async headers() {
+     return [{ source: '/:path*', headers: [
+       { key: 'X-Content-Type-Options', value: 'nosniff' },
+--- baseline/public/README.md
++++ modified/public/README.md
+@@ -1,5 +1,8 @@
+-# CMC Infrasec logo
++# CMC Infrasec official artwork
+ 
+-The official logo is the only pending input. No substitute club logo has been fabricated.
+-Install the supplied PNG/JPEG/WebP with `scripts/install_logo.py`; the result is `public/club-logo.png`.
+-The authorized treasure screen detects this asset dynamically. Restart Next.js after adding a new public file.
++- `/club-logo.png`: black background, white artwork; primary supplied PNG normalized to 1024×1024.
++- `/club-logo-light.jpg`: white background, black artwork; exact supplied alternative JPEG.
++
++The `ClubLogo` component uses the light alternative in the light theme and the primary in the dark theme at the header, footer and authorized treasure screen. Both remain opaque: no crop, inversion, recoloring, background removal or circular mask. The originals remain byte-for-byte under `assets/branding/originals/`.
++
++Rebuild and restart Next.js after changing public assets.
+Binary file added: public/club-logo-light.jpg; SHA256 e97f24b22ba2cb54a699a0491412becc731094523f3cbd37c6315f01c853dfeb
+Binary file added: public/club-logo.png; SHA256 80a13bfadb44dede04ee8a1df79ff8c59bcbbd8f18860c0a4452e15e4852085d
+--- baseline/scripts/check_palette.py
++++ modified/scripts/check_palette.py
+@@ -0,0 +1,43 @@
++"""WCAG sRGB contrast checks for the actual CSS theme tokens."""
++import json
++import re
++from pathlib import Path
++
++
++def luminance(color):
++    values = [int(color[i:i+2], 16) / 255 for i in (1, 3, 5)]
++    linear = [v / 12.92 if v <= .04045 else ((v + .055) / 1.055) ** 2.4 for v in values]
++    return sum(a*b for a, b in zip(linear, (.2126, .7152, .0722)))
++
++
++def contrast(a, b):
++    x, y = sorted((luminance(a), luminance(b)))
++    return (y + .05) / (x + .05)
++
++
++root = Path(__file__).resolve().parent.parent
++css = (root / 'app/globals.css').read_text(encoding='utf-8-sig')
++results = []
++for theme, selector in [('light', ':root'), ('dark', ":root[data-theme='dark']")]:
++    block = re.search(re.escape(selector) + r'\s*\{([^}]+)\}', css)[1]
++    colors = dict(re.findall(r'--([\w-]+):\s*(#[0-9a-fA-F]{6})(?=[;\s])', block))
++    for fg in ('ink', 'muted', 'coral'):
++        for bg in ('paper', 'panel', 'ocean', 'soft'):
++            results.append({'theme': theme, 'foreground': fg, 'background': bg,
++                            'ratio': round(contrast(colors[fg], colors[bg]), 3), 'threshold': 4.5})
++    for fg in ('success', 'error'):
++        results.append({'theme': theme, 'foreground': fg, 'background': 'panel',
++                        'ratio': round(contrast(colors[fg], colors['panel']), 3), 'threshold': 4.5})
++    button_text = colors['panel'] if theme == 'light' else '#183e38'
++    results.append({'theme': theme, 'foreground': 'button-label', 'background': 'coral',
++                    'ratio': round(contrast(button_text, colors['coral']), 3), 'threshold': 4.5})
++    for fg in ('control-border', 'focus'):
++        results.append({'theme': theme, 'foreground': fg, 'background': 'panel',
++                        'ratio': round(contrast(colors[fg], colors['panel']), 3), 'threshold': 3.0})
++failed = [row for row in results if row['ratio'] < row['threshold']]
++output = root / 'evidence/logo-update/palette-contrast.json'
++output.parent.mkdir(parents=True, exist_ok=True)
++output.write_text(json.dumps(results, indent=2), encoding='utf-8')
++if failed:
++    print(json.dumps(failed)); raise SystemExit(1)
++print(f"PALETTE_OK pairs={len(results)} min_text={min(r['ratio'] for r in results if r['threshold']==4.5):.2f} min_ui={min(r['ratio'] for r in results if r['threshold']==3):.2f}")
+--- baseline/tests/game.spec.ts
++++ modified/tests/game.spec.ts
+@@ -1,10 +1,24 @@
+-import { expect, test, type Page } from '@playwright/test';
++import { expect, test, type Page, type Locator } from '@playwright/test';
+ import AxeBuilder from '@axe-core/playwright';
+ import fs from 'node:fs';
+ import { decode } from '../lib/game';
+ 
+ const base = 'http://127.0.0.1:3100';
+ const headers = { origin: base, 'x-expedition': '1' };
++
++async function expectOpaqueArtwork(logo: Locator) {
++  const minimumAlpha = await logo.evaluate((image: HTMLImageElement) => {
++    const canvas = document.createElement('canvas');
++    canvas.width = image.naturalWidth; canvas.height = image.naturalHeight;
++    const context = canvas.getContext('2d')!;
++    context.drawImage(image, 0, 0);
++    const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
++    let minimum = 255;
++    for (let i = 3; i < pixels.length; i += 4) minimum = Math.min(minimum, pixels[i]);
++    return minimum;
++  });
++  expect(minimumAlpha).toBe(255);
++}
+ 
+ test('all learning-bench methods and input errors', () => {
+   expect(decode('SEVMTE8=', 'base64', 3, '')).toBe('HELLO');
+@@ -58,6 +72,7 @@
+     const errors: string[] = []; page.on('pageerror', e => errors.push(e.message));
+     await enter(page, `Captain ${mode}`);
+     if (mode === 'hard') await page.getByRole('button', { name: 'Hard Thử sức' }).click();
++    if (mode === 'hard') await page.getByRole('button', { name: 'Bật giao diện tối' }).click();
+     await expect(page.locator('.treasure-strip')).toBeDisabled();
+     await expect(page.getByRole('button', { name: /2\. Rừng Xoay Chữ/ })).toBeDisabled();
+     for (let stage = 1; stage <= 5; stage++) {
+@@ -90,6 +105,13 @@
+     }
+     await expect(page.getByRole('dialog')).toContainText('sticker logo CMC Infrasec');
+     await expect(page.getByTestId('reward-code')).toHaveText(/NF26-[A-F0-9]{12}/);
++    const rewardLogo = page.getByTestId('club-logo-reward').locator('img:visible');
++    await expect(rewardLogo).toHaveCount(1);
++    await expect(rewardLogo).toHaveAttribute('src', new RegExp(mode === 'hard' ? 'club-logo.png' : 'club-logo-light.jpg'));
++    await expect.poll(() => rewardLogo.evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth > 0)).toBe(true);
++    await expectOpaqueArtwork(rewardLogo);
++    await expect(rewardLogo).toHaveCSS('object-fit', 'contain');
++    await expect(rewardLogo).toHaveCSS('filter', 'none');
+     expect((await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze()).violations).toEqual([]);
+     await page.screenshot({ path: `evidence/screenshots/${mode}-reward.png`, fullPage: true });
+     const code = await page.getByTestId('reward-code').textContent();
+@@ -122,7 +144,10 @@
+   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+   await page.reload();
+   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
++  await page.getByText('Bàn giải mã', { exact: true }).click();
++  expect((await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze()).violations).toEqual([]);
+   await page.getByRole('button', { name: 'Chuyến đi mới' }).click();
++  expect((await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze()).violations).toEqual([]);
+   await page.getByRole('button', { name: 'Tạo chuyến mới' }).click();
+   await expect(page.getByRole('dialog')).not.toBeVisible();
+   await expect(page.locator('.fragment-bar')).toContainText('0/5');
+@@ -150,6 +175,19 @@
+     for (const theme of ['light', 'dark']) {
+       const current = await page.locator('html').getAttribute('data-theme');
+       if (current !== theme) await page.getByRole('button', { name: theme === 'dark' ? 'Bật giao diện tối' : 'Bật giao diện sáng' }).click();
++      for (const placement of ['header', 'footer']) {
++        const logo = page.getByTestId(`club-logo-${placement}`).locator('img:visible');
++        await expect(logo).toHaveCount(1);
++        await expect(logo).toHaveAttribute('alt', 'Logo CMC Infrasec');
++        await expect(logo).toHaveAttribute('src', new RegExp(theme === 'dark' ? 'club-logo.png' : 'club-logo-light.jpg'));
++        await logo.scrollIntoViewIfNeeded();
++        await expect.poll(() => logo.evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth > 0)).toBe(true);
++        await expectOpaqueArtwork(logo);
++        await expect(logo).toHaveCSS('object-fit', 'contain');
++        await expect(logo).toHaveCSS('filter', 'none');
++        expect(await logo.evaluate(img => Math.abs(img.getBoundingClientRect().width - img.getBoundingClientRect().height))).toBeLessThan(1);
++      }
++      await page.evaluate(() => scrollTo(0, 0));
+       const result = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze();
+       expect(result.violations, JSON.stringify(result.violations, null, 2)).toEqual([]);
+       await page.screenshot({ path: `evidence/screenshots/${width}-${theme}.png`, fullPage: true });
+@@ -164,3 +202,14 @@
+   await page.keyboard.press('Escape');
+   await expect(page.getByRole('button', { name: 'Cách chơi', exact: true })).toBeFocused();
+ });
++
++test('official logo assets are served and authorize the real reward artwork', async ({ request }) => {
++  const catalog = await request.get('/api/v1/catalog');
++  expect((await catalog.json()).logo_ready).toBe(true);
++  for (const name of ['club-logo.png', 'club-logo-light.jpg']) {
++    const response = await request.get('/' + name);
++    expect(response.status()).toBe(200);
++    expect(response.headers()['content-type']).toMatch(/^image\//);
++    expect((await response.body()).length).toBeGreaterThan(10000);
++  }
++});

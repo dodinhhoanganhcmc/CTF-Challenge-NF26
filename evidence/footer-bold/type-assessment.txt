@@ -1,0 +1,7 @@
+Component scope: footer only; macrostructure and archetype rotation skipped.
+Source: app/globals.css baseline line 175 sets Poppins Medium 500, not a competing family.
+Poppins 700 asset exists; actual font metadata identifies weight 700.
+At 14px, 700 copyright advance is 220.95px versus 288px available at a 320px viewport; no new asset or size needed.
+Requested hierarchy: copyright stronger, no new visual system.
+Preserve copy, left edge, sizes and #FEFEFE/#020202 surfaces.
+Hallmark pre-emit critique: Philosophy 5, Hierarchy 4, Execution 5, Specificity 5, Restraint 5, Variety 3.

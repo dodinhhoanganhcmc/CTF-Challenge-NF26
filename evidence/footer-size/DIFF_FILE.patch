@@ -1,0 +1,22 @@
+--- baseline/app/globals.css
++++ modified/app/globals.css
+@@ -271,3 +271,8 @@
+   font-style:normal;
+   font-synthesis:none;
+ }
++
++/* Smaller copyright, retaining the established Poppins Bold weight and left edge. */
++:root { --text-footer:14px; }
++.footer-bottom { font-size:var(--text-footer); }
++@media(max-width:600px) { :root { --text-footer:12px; } }
+--- baseline/tests/game.spec.ts
++++ modified/tests/game.spec.ts
+@@ -229,7 +229,7 @@
+     await expect(page.getByText('Mỗi màn là một kỹ năng, không phải bài kiểm tra.', { exact: true })).toHaveCount(0);
+     await expect(page.locator('.footer-bottom')).toHaveCSS('justify-content', 'flex-start');
+     await expect(page.locator('.footer-bottom')).toHaveCSS('text-align', 'left');
+-    await expect(page.locator('.footer-bottom')).toHaveCSS('font-size', width <= 600 ? '14px' : '16px');
++    await expect(page.locator('.footer-bottom')).toHaveCSS('font-size', width <= 600 ? '12px' : '14px');
+     await expect(page.locator('.footer-bottom > span')).toHaveCSS('font-family', /Poppins/);
+     await expect(page.locator('.footer-bottom > span')).toHaveCSS('font-weight', '700');
+     await expect(page.locator('.footer-bottom > span')).toHaveCSS('font-synthesis', 'none');

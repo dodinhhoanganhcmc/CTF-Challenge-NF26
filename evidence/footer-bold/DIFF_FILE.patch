@@ -1,0 +1,39 @@
+--- baseline/app/globals.css
++++ modified/app/globals.css
+@@ -258,3 +258,16 @@
+ 
+ /* One consistent family across native controls, code examples and all UI surfaces. */
+ code,kbd,samp,pre,input,textarea,select,button { font-family:var(--font-sans); }
++
++/* Hallmark · component: footer typography · genre: playful · theme: incumbent
++ * pre-emit critique: Philosophy 5 · Hierarchy 4 · Execution 5 · Specificity 5 · Restraint 5 · Variety 3
++ * Static copyright: preserve size, alignment, copy and the established Poppins family.
++ */
++:root { --font-weight-footer:700; }
++.footer-bottom,
++.footer-bottom > span:first-child {
++  font-family:var(--font-sans);
++  font-weight:var(--font-weight-footer);
++  font-style:normal;
++  font-synthesis:none;
++}
+--- baseline/tests/game.spec.ts
++++ modified/tests/game.spec.ts
+@@ -230,6 +230,17 @@
+     await expect(page.locator('.footer-bottom')).toHaveCSS('justify-content', 'flex-start');
+     await expect(page.locator('.footer-bottom')).toHaveCSS('text-align', 'left');
+     await expect(page.locator('.footer-bottom')).toHaveCSS('font-size', width <= 600 ? '14px' : '16px');
++    await expect(page.locator('.footer-bottom > span')).toHaveCSS('font-family', /Poppins/);
++    await expect(page.locator('.footer-bottom > span')).toHaveCSS('font-weight', '700');
++    await expect(page.locator('.footer-bottom > span')).toHaveCSS('font-synthesis', 'none');
++    const footerSession = await page.context().newCDPSession(page);
++    await footerSession.send('DOM.enable'); await footerSession.send('CSS.enable');
++    const footerDocument = await footerSession.send('DOM.getDocument');
++    const footerNode = await footerSession.send('DOM.querySelector', { nodeId: footerDocument.root.nodeId, selector: '.footer-bottom > span' });
++    const actualFooterFonts = await footerSession.send('CSS.getPlatformFontsForNode', { nodeId: footerNode.nodeId });
++    expect(actualFooterFonts.fonts.length).toBeGreaterThan(0);
++    expect(actualFooterFonts.fonts.every(font => font.isCustomFont && /Poppins.*Bold/i.test(font.postScriptName))).toBe(true);
++    await footerSession.detach();
+     const footerEdges = await page.evaluate(() => ({
+       footer: document.querySelector('.footer-bottom')!.getBoundingClientRect().left,
+       text: document.querySelector('.footer-bottom > span')!.getBoundingClientRect().left,

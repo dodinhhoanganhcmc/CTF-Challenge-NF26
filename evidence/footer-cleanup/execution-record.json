@@ -1,0 +1,82 @@
+[
+  {
+    "label": "BASELINE",
+    "command": ".venv\\Scripts\\python.exe evidence/footer-cleanup/check_state.py evidence/footer-cleanup/baseline",
+    "input": "Original background colors, logo border, footer logo, Weight label and font.",
+    "stdout": "{\"light\":\"#ffffff\",\"dark\":\"#000000\",\"logo_border\":\"1px solid var(--line)\",\"footer_logo\":true,\"copyright\":false,\"weight_label\":true,\"poppins\":false}\n",
+    "stderr": "",
+    "exit": 0
+  },
+  {
+    "label": "MODIFIED",
+    "command": ".venv\\Scripts\\python.exe evidence/footer-cleanup/check_state.py .",
+    "input": "User-specified colors, borderless logo, copyright-only footer, removed Weight label and Poppins.",
+    "stdout": "{\"light\":\"#fefefe\",\"dark\":\"#020202\",\"logo_border\":\"0\",\"footer_logo\":false,\"copyright\":true,\"weight_label\":false,\"poppins\":true}\n",
+    "stderr": "",
+    "exit": 0
+  },
+  {
+    "label": "PALETTE",
+    "command": ".venv\\Scripts\\python.exe scripts/check_palette.py",
+    "input": "34 actual text, button, border and focus color pairs.",
+    "stdout": "PALETTE_OK pairs=34 min_text=6.07 min_ui=4.50\n",
+    "stderr": "",
+    "exit": 0
+  },
+  {
+    "label": "API_TESTS",
+    "command": ".venv\\Scripts\\python.exe -m pytest backend/tests -q",
+    "input": "Existing real puzzle and opaque logo regressions.",
+    "stdout": "............................                                             [100%]\n28 passed in 7.06s\n",
+    "stderr": "",
+    "exit": 0
+  },
+  {
+    "label": "TYPECHECK",
+    "command": "npm run typecheck",
+    "input": "Current TypeScript.",
+    "stdout": "\n> dao-mat-ma@1.0.0 typecheck\n> tsc --noEmit\n\n",
+    "stderr": "",
+    "exit": 0
+  },
+  {
+    "label": "BUILD",
+    "command": "npm run build",
+    "input": "Current production frontend.",
+    "stdout": "\n> dao-mat-ma@1.0.0 build\n> next build\n\n▲ Next.js 16.4.3 (Turbopack)\n✓ Running next.config.ts took 220ms\n\n  Creating an optimized production build ...\n✓ Compiled successfully in 56s\n  Running TypeScript ...\n  Finished TypeScript in 2.1s ...\n  Collecting page data using 5 workers ...\n  Generating static pages using 5 workers (0/3) ...\n✓ Generating static pages using 5 workers (3/3) in 592ms\n  Finalizing page optimization ...\n\nRoute (app)\n┌ ○ /\n├ ○ /_not-found\n└ ƒ /api/v1/[...path]\n\n\n○  (Static)   prerendered as static content\nƒ  (Dynamic)  server-rendered on demand\n\n",
+    "stderr": "",
+    "exit": 0
+  },
+  {
+    "label": "E2E",
+    "command": "npm run test:e2e",
+    "input": "Both journeys; five widths/two themes; exact #FEFEFE/#020202 backgrounds, borderless logos, text-only footer, removed Weight label; Poppins loaded for all visible text and Vietnamese; replay still works.",
+    "stdout": "\n> dao-mat-ma@1.0.0 test:e2e\n> playwright test\n\n\nRunning 7 tests using 1 worker\n\n  ✓  1 tests\\game.spec.ts:71:5 › all learning-bench methods and input errors (7ms)\n  ✓  2 tests\\game.spec.ts:118:7 › complete five-stage easy journey, reward, restart and leaderboard (4.8s)\n  ✓  3 tests\\game.spec.ts:118:7 › complete five-stage hard journey, reward, restart and leaderboard (5.6s)\n  ✓  4 tests\\game.spec.ts:180:5 › hints, download, journal, guide, replay and theme controls (3.1s)\n  ✓  5 tests\\game.spec.ts:207:5 › proxy origin, allowlist, body limits and session isolation (450ms)\n  ✓  6 tests\\game.spec.ts:218:5 › responsive light/dark, keyboard, accessibility and visual evidence (7.2s)\n  ✓  7 tests\\game.spec.ts:267:5 › official logo assets are served and authorize the real reward artwork (20ms)\n\n  7 passed (26.6s)\n",
+    "stderr": "[WebServer] INFO:     Started server process [44924]\n[WebServer] INFO:     Waiting for application startup.\n[WebServer] INFO:     Application startup complete.\n[WebServer] INFO:     Uvicorn running on http://127.0.0.1:8100 (Press CTRL+C to quit)\n[WebServer] (node:4180) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)\n(node:57528) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+    "exit": 0
+  },
+  {
+    "label": "NPM_AUDIT",
+    "command": "npm audit --json",
+    "input": "Updated Poppins dependency and lockfile.",
+    "stdout": "{\n  \"auditReportVersion\": 2,\n  \"vulnerabilities\": {},\n  \"metadata\": {\n    \"vulnerabilities\": {\n      \"info\": 0,\n      \"low\": 0,\n      \"moderate\": 0,\n      \"high\": 0,\n      \"critical\": 0,\n      \"total\": 0\n    },\n    \"dependencies\": {\n      \"prod\": 21,\n      \"dev\": 48,\n      \"optional\": 61,\n      \"peer\": 0,\n      \"peerOptional\": 0,\n      \"total\": 106\n    }\n  }\n}\n",
+    "stderr": "",
+    "exit": 0
+  },
+  {
+    "label": "ROLLBACK",
+    "command": "\"C:\\Program Files\\Git\\bin\\bash.exe\" evidence/footer-cleanup/ROLLBACK.sh L:/ctf-chall/evidence/footer-cleanup/rollback-copy",
+    "input": "Separate copy; source restored, npm ci and production build verify original fonts/dependencies. No player data touched.",
+    "stdout": "ROLLBACK_OK restored=47 removed=6\n\nadded 56 packages in 2m\n\n> dao-mat-ma@1.0.0 build\n> next build\n\n▲ Next.js 16.4.3 (Turbopack)\n✓ Running next.config.ts took 38ms\n\n  Creating an optimized production build ...\n✓ Compiled successfully in 1640ms\n  Running TypeScript ...\n  Finished TypeScript in 2.5s ...\n  Collecting page data using 5 workers ...\n  Generating static pages using 5 workers (0/3) ...\n✓ Generating static pages using 5 workers (3/3) in 688ms\n  Finalizing page optimization ...\n\nRoute (app)\n┌ ○ /\n├ ○ /_not-found\n└ ƒ /api/v1/[...path]\n\n\n○  (Static)   prerendered as static content\nƒ  (Dynamic)  server-rendered on demand\n\nROLLBACK_BUILD_OK\n",
+    "stderr": "⚠ Warning: Next.js inferred your workspace root, but it may not be correct.\n We detected multiple lockfiles and selected the directory of L:\\ctf-chall\\package-lock.json as the root directory.\n To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.\n   See https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory for more information.\n Detected additional lockfiles: \n   * L:\\ctf-chall\\evidence\\footer-cleanup\\rollback-copy\\package-lock.json\n\n",
+    "exit": 0
+  },
+  {
+    "label": "RESTORED",
+    "command": ".venv\\Scripts\\python.exe evidence/footer-cleanup/check_state.py evidence/footer-cleanup/rollback-copy",
+    "input": "Verify previous palette and heading are restored on the copy only.",
+    "stdout": "{\"light\":\"#ffffff\",\"dark\":\"#000000\",\"logo_border\":\"1px solid var(--line)\",\"footer_logo\":true,\"copyright\":false,\"weight_label\":true,\"poppins\":false}\n",
+    "stderr": "",
+    "exit": 0
+  }
+]

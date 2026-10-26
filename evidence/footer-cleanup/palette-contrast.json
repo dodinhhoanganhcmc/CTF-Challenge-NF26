@@ -1,0 +1,240 @@
+[
+  {
+    "theme": "light",
+    "foreground": "ink",
+    "background": "paper",
+    "ratio": 17.776,
+    "threshold": 4.5
+  },
+  {
+    "theme": "light",
+    "foreground": "ink",
+    "background": "panel",
+    "ratio": 17.776,
+    "threshold": 4.5
+  },
+  {
+    "theme": "light",
+    "foreground": "ink",
+    "background": "ocean",
+    "ratio": 17.776,
+    "threshold": 4.5
+  },
+  {
+    "theme": "light",
+    "foreground": "ink",
+    "background": "soft",
+    "ratio": 17.776,
+    "threshold": 4.5
+  },
+  {
+    "theme": "light",
+    "foreground": "muted",
+    "background": "paper",
+    "ratio": 7.392,
+    "threshold": 4.5
+  },
+  {
+    "theme": "light",
+    "foreground": "muted",
+    "background": "panel",
+    "ratio": 7.392,
+    "threshold": 4.5
+  },
+  {
+    "theme": "light",
+    "foreground": "muted",
+    "background": "ocean",
+    "ratio": 7.392,
+    "threshold": 4.5
+  },
+  {
+    "theme": "light",
+    "foreground": "muted",
+    "background": "soft",
+    "ratio": 7.392,
+    "threshold": 4.5
+  },
+  {
+    "theme": "light",
+    "foreground": "coral",
+    "background": "paper",
+    "ratio": 6.072,
+    "threshold": 4.5
+  },
+  {
+    "theme": "light",
+    "foreground": "coral",
+    "background": "panel",
+    "ratio": 6.072,
+    "threshold": 4.5
+  },
+  {
+    "theme": "light",
+    "foreground": "coral",
+    "background": "ocean",
+    "ratio": 6.072,
+    "threshold": 4.5
+  },
+  {
+    "theme": "light",
+    "foreground": "coral",
+    "background": "soft",
+    "ratio": 6.072,
+    "threshold": 4.5
+  },
+  {
+    "theme": "light",
+    "foreground": "success",
+    "background": "panel",
+    "ratio": 6.807,
+    "threshold": 4.5
+  },
+  {
+    "theme": "light",
+    "foreground": "error",
+    "background": "panel",
+    "ratio": 6.913,
+    "threshold": 4.5
+  },
+  {
+    "theme": "light",
+    "foreground": "button-label",
+    "background": "coral",
+    "ratio": 6.072,
+    "threshold": 4.5
+  },
+  {
+    "theme": "light",
+    "foreground": "control-border",
+    "background": "panel",
+    "ratio": 4.504,
+    "threshold": 3.0
+  },
+  {
+    "theme": "light",
+    "foreground": "focus",
+    "background": "panel",
+    "ratio": 5.886,
+    "threshold": 3.0
+  },
+  {
+    "theme": "dark",
+    "foreground": "ink",
+    "background": "paper",
+    "ratio": 19.031,
+    "threshold": 4.5
+  },
+  {
+    "theme": "dark",
+    "foreground": "ink",
+    "background": "panel",
+    "ratio": 19.031,
+    "threshold": 4.5
+  },
+  {
+    "theme": "dark",
+    "foreground": "ink",
+    "background": "ocean",
+    "ratio": 19.031,
+    "threshold": 4.5
+  },
+  {
+    "theme": "dark",
+    "foreground": "ink",
+    "background": "soft",
+    "ratio": 19.031,
+    "threshold": 4.5
+  },
+  {
+    "theme": "dark",
+    "foreground": "muted",
+    "background": "paper",
+    "ratio": 11.044,
+    "threshold": 4.5
+  },
+  {
+    "theme": "dark",
+    "foreground": "muted",
+    "background": "panel",
+    "ratio": 11.044,
+    "threshold": 4.5
+  },
+  {
+    "theme": "dark",
+    "foreground": "muted",
+    "background": "ocean",
+    "ratio": 11.044,
+    "threshold": 4.5
+  },
+  {
+    "theme": "dark",
+    "foreground": "muted",
+    "background": "soft",
+    "ratio": 11.044,
+    "threshold": 4.5
+  },
+  {
+    "theme": "dark",
+    "foreground": "coral",
+    "background": "paper",
+    "ratio": 11.717,
+    "threshold": 4.5
+  },
+  {
+    "theme": "dark",
+    "foreground": "coral",
+    "background": "panel",
+    "ratio": 11.717,
+    "threshold": 4.5
+  },
+  {
+    "theme": "dark",
+    "foreground": "coral",
+    "background": "ocean",
+    "ratio": 11.717,
+    "threshold": 4.5
+  },
+  {
+    "theme": "dark",
+    "foreground": "coral",
+    "background": "soft",
+    "ratio": 11.717,
+    "threshold": 4.5
+  },
+  {
+    "theme": "dark",
+    "foreground": "success",
+    "background": "panel",
+    "ratio": 14.469,
+    "threshold": 4.5
+  },
+  {
+    "theme": "dark",
+    "foreground": "error",
+    "background": "panel",
+    "ratio": 12.198,
+    "threshold": 4.5
+  },
+  {
+    "theme": "dark",
+    "foreground": "button-label",
+    "background": "coral",
+    "ratio": 10.124,
+    "threshold": 4.5
+  },
+  {
+    "theme": "dark",
+    "foreground": "control-border",
+    "background": "panel",
+    "ratio": 5.853,
+    "threshold": 3.0
+  },
+  {
+    "theme": "dark",
+    "foreground": "focus",
+    "background": "panel",
+    "ratio": 13.58,
+    "threshold": 3.0
+  }
+]
