@@ -1,6 +1,7 @@
 import { defineConfig } from '@playwright/test';
 import path from 'node:path';
-const database = path.resolve(`.scratch/e2e-${Date.now()}.sqlite3`);
+const database = process.env.E2E_DATABASE_PATH || path.resolve(`.scratch/e2e-${Date.now()}.sqlite3`);
+process.env.E2E_DATABASE_PATH = database;
 export default defineConfig({
   testDir: './tests', timeout: 60000, fullyParallel: false, workers: 1,
   reporter: [['list'], ['html', { open: 'never' }]],

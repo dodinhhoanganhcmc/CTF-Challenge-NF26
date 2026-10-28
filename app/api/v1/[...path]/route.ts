@@ -1,15 +1,15 @@
 import { NextRequest } from 'next/server';
 export const dynamic = 'force-dynamic';
-const allowed = /^(session|catalog|leaderboard|treasure|stages\/[1-5](?:\/(artifact|hints|answers))?)$/;
+const allowed = /^(session|catalog|leaderboard|treasure|stages\/[1-5](?:\/(artifact|hints|answers|timing|retries))?)$/;
 
 async function proxy(request: NextRequest, context: { params: Promise<{ path: string[] }> }) {
   const { path } = await context.params;
   const route = path.join('/');
   if (!allowed.test(route)) return Response.json({ detail: 'Đường dẫn không tồn tại.' }, { status: 404 });
   const writes = request.method === 'POST';
-  const postAllowed = route === 'session' || /^stages\/[1-5]\/(answers|hints)$/.test(route);
+  const postAllowed = route === 'session' || /^stages\/[1-5]\/(answers|hints|retries)$/.test(route);
   if (writes && !postAllowed) return Response.json({ detail: 'Phương thức không hợp lệ.' }, { status: 405 });
-  if (!writes && /\/(answers|hints)$/.test(route)) return Response.json({ detail: 'Phương thức không hợp lệ.' }, { status: 405 });
+  if (!writes && /\/(answers|hints|retries)$/.test(route)) return Response.json({ detail: 'Phương thức không hợp lệ.' }, { status: 405 });
   const origins = (process.env.APP_ORIGINS || 'http://127.0.0.1:3000,http://localhost:3000').split(',');
   if (writes && (!origins.includes(request.headers.get('origin') || '') || request.headers.get('x-expedition') !== '1')) {
     return Response.json({ detail: 'Nguồn yêu cầu không hợp lệ.' }, { status: 403 });

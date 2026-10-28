@@ -1,6 +1,9 @@
 export type Mode = 'easy' | 'hard';
 export type Stage = { id: number; title: string; location: string; category: string; weight: number; summary: string };
-export type Clue = Stage & { payload: string; objective: string; hints: string[]; sample: string; tool: string; artifact_name: string; debrief: string | null };
+export type Timing = { started_at: number; deadline: number; server_now: number; limit_seconds: number;
+  elapsed_seconds: number | null; remaining_seconds: number; expired: boolean; attempt: number; solved: boolean;
+  awarded_points: number | null; points_available: number; legacy_scoring: boolean };
+export type Clue = Stage & { payload: string; objective: string; hints: string[]; sample: string; tool: string; artifact_name: string; debrief: string | null; timing: Timing };
 export type Progress = { solved: number[]; points: number; hints: Record<string, number> };
 export type Session = { name: string; csrf: string; modes: Record<Mode, Progress> };
 export type Reward = { name: string; code: string; reward: string; event: string; instruction: string; seconds: number; logo_ready: boolean };

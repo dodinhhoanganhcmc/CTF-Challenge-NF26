@@ -19,7 +19,7 @@ HEADERS = {'origin': 'http://127.0.0.1:3000', 'x-expedition': '1'}
 @pytest.fixture
 def game(tmp_path):
     path = tmp_path / 'test.sqlite3'
-    app = create_app(path)
+    app = create_app(path, clock=lambda: 2_000_000_000.0)
     with TestClient(app) as c:
         c.headers.update(HEADERS)
         data = c.post('/api/v1/session', json={'name': 'Thuyền trưởng Mèo'}).json()
@@ -165,7 +165,7 @@ def test_restart_persistence_and_parallel_solves(game):
     with ThreadPoolExecutor(max_workers=4) as pool:
         results = list(pool.map(lambda _: c.post('/api/v1/stages/1/answers?mode=easy', json={'flag': flag}), range(4)))
     assert all(r.json()['correct'] for r in results)
-    restarted = TestClient(create_app(path), headers=HEADERS)
+    restarted = TestClient(create_app(path, clock=lambda: 2_000_000_000.0), headers=HEADERS)
     restarted.cookies.update(c.cookies)
     assert restarted.get('/api/v1/session').json()['modes']['easy']['points'] == 200
     assert restarted.get('/api/v1/leaderboard?mode=easy').json()['total'] == 1

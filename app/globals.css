@@ -276,3 +276,17 @@ code,kbd,samp,pre,input,textarea,select,button { font-family:var(--font-sans); }
 :root { --text-footer:14px; }
 .footer-bottom { font-size:var(--text-footer); }
 @media(max-width:600px) { :root { --text-footer:12px; } }
+
+/* Server-owned stage timing: quiet, readable, no ticking live-region announcements. */
+.stage-clock { margin:18px 0; padding:13px 14px; border:1px solid var(--control-border); border-radius:7px; }
+.clock-main { display:flex; align-items:center; gap:10px; }
+.clock-label { display:block; font-size:10px; color:var(--muted); }
+.clock-main strong { display:block; font-size:28px; font-weight:700; line-height:1.3; font-variant-numeric:tabular-nums; letter-spacing:.02em; }
+.clock-limit { margin-left:auto; font-size:10px; color:var(--muted); text-align:right; }
+.clock-points { font-size:11px; margin-top:8px; border-top:1px solid var(--line); padding-top:8px; }
+.time-low { border-color:var(--error); }
+.time-low .clock-main strong { color:var(--error); }
+.timeout-state { border:1px solid var(--error); border-radius:7px; padding:13px; margin:14px 0; }
+.timeout-state > strong { display:block; font-size:14px; color:var(--error); }
+.timeout-state p { font-size:11px; margin:7px 0; }
+@media(max-width:600px) { .clock-main strong { font-size:26px; } .stage-clock { padding:12px; } }

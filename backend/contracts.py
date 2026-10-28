@@ -38,6 +38,21 @@ class Session(BaseModel):
     modes: dict[Literal['easy', 'hard'], Progress]
 
 
+class Timing(BaseModel):
+    started_at: float
+    deadline: float
+    server_now: float
+    limit_seconds: int
+    elapsed_seconds: float | None
+    remaining_seconds: float
+    expired: bool
+    attempt: int
+    solved: bool
+    awarded_points: int | None
+    legacy_scoring: bool
+    points_available: int
+
+
 class Clue(Stage):
     payload: str
     objective: str
@@ -46,6 +61,7 @@ class Clue(Stage):
     tool: str
     artifact_name: str
     debrief: str | None
+    timing: Timing
 
 
 class Hints(BaseModel):
@@ -57,6 +73,7 @@ class AnswerResult(BaseModel):
     detail: str | None = None
     debrief: str | None = None
     session: Session | None = None
+    timing: Timing | None = None
 
 
 class Treasure(BaseModel):

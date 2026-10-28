@@ -1,16 +1,64 @@
+# JavaScript / Next.js generated files
 node_modules/
 .next/
-.venv/
-__pycache__/
-.pytest_cache/
-*.pyc
+out/
+dist/
+.turbo/
+.vercel/
+.npm/
 *.tsbuildinfo
+
+# Python environments, caches and test coverage
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage/
+
+# Real environment/configuration credentials; retain documented templates
 .env*
 !.env.example
-backend/data/
+!.env.*.example
+!.env.template
+!.env.*.template
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Player data and SQLite sidecars/backups, wherever generated
+/backend/data/
+*.sqlite
+*.sqlite-*
+*.sqlite3
+*.sqlite3-*
+*.db
+*.db-*
+*.sqlite*.bak
+*.db.bak
+/backups/
+
+# Logs, browser reports and local conversation/execution evidence
+*.log
+/logs/
 test-results/
 playwright-report/
-evidence/rollback-copy/
-evidence/runtime/
-.scratch/**/*.sqlite3
-.scratch/**/*.sqlite3-*
+/evidence/
+/codex-session*.md
+
+# Local editor / OS scratch files (keep shared project configuration)
+.DS_Store
+Thumbs.db
+Desktop.ini
+.idea/
+*.swp
+*.swo
+*~
+*.tmp
+*.bak

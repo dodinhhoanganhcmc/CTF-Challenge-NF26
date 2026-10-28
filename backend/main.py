@@ -16,6 +16,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from backend.puzzles import DEBRIEFS, STAGES, flag_for, image_artifact, puzzle
 from backend import contracts
+from backend.timing import LIMITS, score
 
 Mode = Literal['easy', 'hard']
 ROOT = Path(__file__).resolve().parent.parent
@@ -39,7 +40,8 @@ class Answer(BaseModel):
     flag: str = Field(min_length=1, max_length=160)
 
 
-def create_app(db_path=None):
+def create_app(db_path=None, clock=None):
+    now = clock or time.time
     app = FastAPI(title='Đảo Mật Mã · NextFest 26', version='1.0.0')
     path = Path(db_path or os.getenv('DATABASE_PATH', str(ROOT / 'backend/data/game.sqlite3')))
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -79,13 +81,18 @@ def create_app(db_path=None):
           PRIMARY KEY(session, mode, stage));
         CREATE TABLE IF NOT EXISTS limits (
           key TEXT PRIMARY KEY, window INTEGER NOT NULL, count INTEGER NOT NULL);
+        CREATE TABLE IF NOT EXISTS stage_timers (
+          session TEXT NOT NULL REFERENCES sessions(id), mode TEXT NOT NULL,
+          stage INTEGER NOT NULL, started REAL NOT NULL, deadline REAL NOT NULL,
+          attempt INTEGER NOT NULL, seed TEXT NOT NULL, finished REAL,
+          PRIMARY KEY(session, mode, stage));
         ''')
 
     def fail(status, detail):
         raise HTTPException(status, detail)
 
     def rate(con, key, maximum, seconds=60):
-        window = int(time.time() // seconds)
+        window = int(now() // seconds)
         row = con.execute('SELECT * FROM limits WHERE key=?', (key,)).fetchone()
         if row and row['window'] == window and row['count'] >= maximum:
             fail(429, 'Bạn thao tác hơi nhanh. Hãy thử lại sau một phút.')
@@ -95,7 +102,7 @@ def create_app(db_path=None):
     def session(con, request, write=False):
         raw = request.cookies.get('expedition', '')
         sid = hashlib.sha256(raw.encode()).hexdigest()
-        row = con.execute('SELECT * FROM sessions WHERE id=? AND expires>?', (sid, time.time())).fetchone()
+        row = con.execute('SELECT * FROM sessions WHERE id=? AND expires>?', (sid, now())).fetchone()
         if not row:
             fail(401, 'Nhập tên để bắt đầu một chuyến thám hiểm.')
         if write and not hmac.compare_digest(request.headers.get('x-csrf-token', ''), row['csrf']):
@@ -111,7 +118,45 @@ def create_app(db_path=None):
         if stage > counts(con, guest['id'], mode) + 1:
             fail(409, 'Hoàn thành địa điểm trước để mở lối đi này.')
         con.execute('INSERT OR IGNORE INTO progress(session,mode,started) VALUES (?,?,?)',
-                    (guest['id'], mode, time.time()))
+                    (guest['id'], mode, now()))
+
+    def stage_timer(con, guest, mode, stage):
+        unlock(con, guest, mode, stage)
+        stamp = now()
+        con.execute('''INSERT OR IGNORE INTO stage_timers
+            (session,mode,stage,started,deadline,attempt,seed) VALUES (?,?,?,?,?,1,?)''',
+                    (guest['id'], mode, stage, stamp, stamp + LIMITS[mode], guest['seed']))
+        return con.execute('SELECT * FROM stage_timers WHERE session=? AND mode=? AND stage=?', (guest['id'], mode, stage)).fetchone()
+
+    def timer_state(con, timer):
+        stamp = now()
+        solved = con.execute('SELECT points,solved FROM solves WHERE session=? AND mode=? AND stage=?',
+                             (timer['session'], timer['mode'], timer['stage'])).fetchone()
+        # Existing solved records predate timing; preserve their awarded score.
+        end = timer['finished'] if timer['finished'] is not None else stamp
+        elapsed = max(0, end - timer['started'])
+        remaining = max(0, timer['deadline'] - end)
+        legacy = bool(solved and solved['solved'] < timer['started'])
+        hints = con.execute('SELECT count FROM hints WHERE session=? AND mode=? AND stage=?',
+                            (timer['session'], timer['mode'], timer['stage'])).fetchone()
+        return {'started_at': timer['started'], 'deadline': timer['deadline'], 'server_now': stamp,
+                'limit_seconds': LIMITS[timer['mode']], 'elapsed_seconds': None if legacy else min(LIMITS[timer['mode']], elapsed),
+                'remaining_seconds': 0 if legacy else remaining, 'expired': not solved and stamp >= timer['deadline'],
+                'attempt': timer['attempt'], 'solved': bool(solved), 'awarded_points': solved['points'] if solved else None,
+                'legacy_scoring': legacy,
+                'points_available': solved['points'] if solved else score(STAGES[timer['stage']-1]['weight'], elapsed,
+                    LIMITS[timer['mode']], hints['count'] if hints else 0, timer['attempt'])}
+
+    def clue_data(con, guest, mode, stage, timer):
+        data = puzzle(timer['seed'], mode, stage)
+        saved = con.execute('SELECT count FROM hints WHERE session=? AND mode=? AND stage=?', (guest['id'], mode, stage)).fetchone()
+        data['hints'] = data['hints'][:saved['count'] if saved else 0]
+        data['debrief'] = DEBRIEFS[stage-1] if stage <= counts(con, guest['id'], mode) else None
+        return {**STAGES[stage-1], **data, 'timing': timer_state(con, timer)}
+
+    def require_time(timer, stamp=None):
+        if (now() if stamp is None else stamp) >= timer['deadline']:
+            fail(409, 'Hết giờ cho bài này. Chọn Chơi lại bài để nhận flag mới; mức điểm giảm còn 50%.')
 
     def state(con, guest):
         modes = {}
@@ -165,7 +210,7 @@ def create_app(db_path=None):
         with db() as con:
             rate(con, 'new:' + (request.client.host if request.client else 'local'), 3000, 3600)
             con.execute('INSERT INTO sessions VALUES (?,?,?,?,?)',
-                        (sid, data.name, secrets.token_hex(32), secrets.token_urlsafe(32), time.time() + TTL))
+                        (sid, data.name, secrets.token_hex(32), secrets.token_urlsafe(32), now() + TTL))
             result = state(con, con.execute('SELECT * FROM sessions WHERE id=?', (sid,)).fetchone())
         response.set_cookie('expedition', token, httponly=True, samesite='strict',
                             secure=os.getenv('COOKIE_SECURE', '0') == '1', max_age=TTL, path='/')
@@ -180,20 +225,39 @@ def create_app(db_path=None):
     def clue(stage: int, mode: Mode, request: Request):
         with db() as con:
             guest = session(con, request)
-            unlock(con, guest, mode, stage)
-            data = puzzle(guest['seed'], mode, stage)
-            saved = con.execute('SELECT count FROM hints WHERE session=? AND mode=? AND stage=?', (guest['id'], mode, stage)).fetchone()
-            data['hints'] = data['hints'][:saved['count'] if saved else 0]
-            data['debrief'] = DEBRIEFS[stage-1] if stage <= counts(con, guest['id'], mode) else None
-            return {**STAGES[stage-1], **data}
+            timer = stage_timer(con, guest, mode, stage)
+            return clue_data(con, guest, mode, stage, timer)
+
+    @app.get('/api/v1/stages/{stage}/timing', response_model=contracts.Timing)
+    def timing(stage: int, mode: Mode, request: Request):
+        with db() as con:
+            guest = session(con, request)
+            return timer_state(con, stage_timer(con, guest, mode, stage))
+
+    @app.post('/api/v1/stages/{stage}/retries', response_model=contracts.Clue)
+    def retry_stage(stage: int, mode: Mode, request: Request):
+        with db() as con:
+            guest = session(con, request, True)
+            timer = stage_timer(con, guest, mode, stage)
+            if stage <= counts(con, guest['id'], mode) or now() < timer['deadline']:
+                fail(409, 'Chỉ chơi lại bài chưa giải khi đã hết giờ.')
+            rate(con, 'retry:' + guest['id'], 10)
+            stamp = now()
+            con.execute('''UPDATE stage_timers SET started=?,deadline=?,attempt=attempt+1,seed=?,finished=NULL
+                WHERE session=? AND mode=? AND stage=?''',
+                (stamp, stamp + LIMITS[mode], secrets.token_hex(32), guest['id'], mode, stage))
+            timer = stage_timer(con, guest, mode, stage)
+            return clue_data(con, guest, mode, stage, timer)
 
     @app.get('/api/v1/stages/{stage}/artifact')
     def artifact(stage: int, mode: Mode, request: Request):
         with db() as con:
             guest = session(con, request)
-            unlock(con, guest, mode, stage)
+            timer = stage_timer(con, guest, mode, stage)
+            if stage > counts(con, guest['id'], mode):
+                require_time(timer)
             png = stage == 4 and mode == 'hard'
-            body = image_artifact(guest['seed']) if png else puzzle(guest['seed'], mode, stage)['payload'].encode()
+            body = image_artifact(timer['seed']) if png else puzzle(timer['seed'], mode, stage)['payload'].encode()
             return Response(body, media_type='image/png' if png else 'text/plain; charset=utf-8',
                             headers={'Content-Disposition': 'attachment; filename="' + ('lighthouse.png' if png else 'clue.txt') + '"'})
 
@@ -201,28 +265,39 @@ def create_app(db_path=None):
     def hint(stage: int, mode: Mode, request: Request):
         with db() as con:
             guest = session(con, request, True)
-            unlock(con, guest, mode, stage)
+            timer = stage_timer(con, guest, mode, stage)
+            if stage > counts(con, guest['id'], mode):
+                require_time(timer)
             rate(con, 'hint:' + guest['id'], 30)
             old = con.execute('SELECT count FROM hints WHERE session=? AND mode=? AND stage=?', (guest['id'], mode, stage)).fetchone()
             count = min(3, (old['count'] if old else 0) + 1)
             con.execute('INSERT OR REPLACE INTO hints VALUES (?,?,?,?)', (guest['id'], mode, stage, count))
-            return {'hints': puzzle(guest['seed'], mode, stage)['hints'][:count]}
+            return {'hints': puzzle(timer['seed'], mode, stage)['hints'][:count]}
 
     @app.post('/api/v1/stages/{stage}/answers', response_model=contracts.AnswerResult, response_model_exclude_none=True)
     def answer(stage: int, mode: Mode, data: Answer, request: Request):
         with db() as con:
             guest = session(con, request, True)
-            unlock(con, guest, mode, stage)
+            timer = stage_timer(con, guest, mode, stage)
             rate(con, 'answer:' + guest['id'], 40)
-            if not hmac.compare_digest(data.flag.encode(), flag_for(guest['seed'], mode, stage).encode()):
+            already_solved = stage <= counts(con, guest['id'], mode)
+            stamp = now()
+            if not already_solved:
+                require_time(timer, stamp)
+            if not hmac.compare_digest(data.flag.encode(), flag_for(timer['seed'], mode, stage).encode()):
                 return {'correct': False, 'detail': 'Chưa đúng rồi. Kiểm tra đủ DAO{…}, chữ hoa và dấu ngoặc nhé.'}
             hints = con.execute('SELECT count FROM hints WHERE session=? AND mode=? AND stage=?', (guest['id'], mode, stage)).fetchone()
-            points = STAGES[stage-1]['weight'] * 100 - (hints['count'] if hints else 0) * 25
-            con.execute('INSERT OR IGNORE INTO solves VALUES (?,?,?,?,?)', (guest['id'], mode, stage, points, time.time()))
+            points = score(STAGES[stage-1]['weight'], stamp - timer['started'], LIMITS[mode],
+                           hints['count'] if hints else 0, timer['attempt'])
+            con.execute('INSERT OR IGNORE INTO solves VALUES (?,?,?,?,?)', (guest['id'], mode, stage, points, stamp))
+            if not already_solved:
+                con.execute('UPDATE stage_timers SET finished=? WHERE session=? AND mode=? AND stage=?',
+                            (stamp, guest['id'], mode, stage))
             if counts(con, guest['id'], mode) == 5:
                 con.execute('UPDATE progress SET finished=COALESCE(finished,?),reward=COALESCE(reward,?) WHERE session=? AND mode=?',
-                            (time.time(), 'NF26-' + secrets.token_hex(6).upper(), guest['id'], mode))
-            return {'correct': True, 'debrief': DEBRIEFS[stage-1], 'session': state(con, guest)}
+                            (stamp, 'NF26-' + secrets.token_hex(6).upper(), guest['id'], mode))
+            timer = stage_timer(con, guest, mode, stage)
+            return {'correct': True, 'debrief': DEBRIEFS[stage-1], 'session': state(con, guest), 'timing': timer_state(con, timer)}
 
     @app.get('/api/v1/treasure', response_model=contracts.Treasure)
     def treasure(mode: Mode, request: Request):

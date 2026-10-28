@@ -13,3 +13,7 @@
 
 - Typography: Poppins throughout the site, including controls and puzzle payloads; self-hosted Vietnamese subsets.
 - Footer: text-only `(c) CMC Infrasec x NextFest '26`; replay is beside the guest summary.
+
+- Stage timing: Easy 180s, Hard 420s, server-owned persisted deadline from first stage access; reload, tab switch, mode switch do not pause/reset.
+- Timed scoring: B/2 + floor(B*(T-floor(elapsed))/(2*T)) - hints*25, bounded >=0; after expiry every retry uses a fresh stage-only seed and halves points. No retry before expiry or after solve.
+- Deadline equality rejects submission. Solved score/timing are immutable; prior untimed scores stay unchanged and display legacy status instead of fake elapsed values.

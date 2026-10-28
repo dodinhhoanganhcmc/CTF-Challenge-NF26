@@ -562,6 +562,288 @@
         ]
       }
     },
+    "/api/v1/stages/{stage}/timing": {
+      "get": {
+        "summary": "Timing",
+        "operationId": "timing_api_v1_stages__stage__timing_get",
+        "parameters": [
+          {
+            "name": "stage",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Stage"
+            }
+          },
+          {
+            "name": "mode",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "enum": [
+                "easy",
+                "hard"
+              ],
+              "type": "string",
+              "title": "Mode"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Timing"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed request.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Guest session missing or expired.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Origin, custom header or CSRF validation failed.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown destination.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Destination or treasure is locked.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 4096 bytes.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit reached.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "CookieSession": []
+          }
+        ]
+      }
+    },
+    "/api/v1/stages/{stage}/retries": {
+      "post": {
+        "summary": "Retry Stage",
+        "operationId": "retry_stage_api_v1_stages__stage__retries_post",
+        "parameters": [
+          {
+            "name": "stage",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Stage"
+            }
+          },
+          {
+            "name": "mode",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "enum": [
+                "easy",
+                "hard"
+              ],
+              "type": "string",
+              "title": "Mode"
+            }
+          },
+          {
+            "name": "Origin",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "An origin configured in APP_ORIGINS."
+          },
+          {
+            "name": "X-Expedition",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "const": "1"
+            },
+            "description": "Application request marker."
+          },
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "csrf value returned by the authenticated session read."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Clue"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed request.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Guest session missing or expired.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Origin, custom header or CSRF validation failed.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown destination.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Destination or treasure is locked.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request exceeds 4096 bytes.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit reached.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "CookieSession": []
+          }
+        ]
+      }
+    },
     "/api/v1/stages/{stage}/artifact": {
       "get": {
         "summary": "Artifact",
@@ -1323,6 +1605,16 @@
                 "type": "null"
               }
             ]
+          },
+          "timing": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Timing"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
@@ -1430,6 +1722,9 @@
               }
             ],
             "title": "Debrief"
+          },
+          "timing": {
+            "$ref": "#/components/schemas/Timing"
           }
         },
         "type": "object",
@@ -1446,7 +1741,8 @@
           "sample",
           "tool",
           "artifact_name",
-          "debrief"
+          "debrief",
+          "timing"
         ],
         "title": "Clue"
       },
@@ -1677,6 +1973,88 @@
           "summary"
         ],
         "title": "Stage"
+      },
+      "Timing": {
+        "properties": {
+          "started_at": {
+            "type": "number",
+            "title": "Started At"
+          },
+          "deadline": {
+            "type": "number",
+            "title": "Deadline"
+          },
+          "server_now": {
+            "type": "number",
+            "title": "Server Now"
+          },
+          "limit_seconds": {
+            "type": "integer",
+            "title": "Limit Seconds"
+          },
+          "elapsed_seconds": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Elapsed Seconds"
+          },
+          "remaining_seconds": {
+            "type": "number",
+            "title": "Remaining Seconds"
+          },
+          "expired": {
+            "type": "boolean",
+            "title": "Expired"
+          },
+          "attempt": {
+            "type": "integer",
+            "title": "Attempt"
+          },
+          "solved": {
+            "type": "boolean",
+            "title": "Solved"
+          },
+          "awarded_points": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Awarded Points"
+          },
+          "legacy_scoring": {
+            "type": "boolean",
+            "title": "Legacy Scoring"
+          },
+          "points_available": {
+            "type": "integer",
+            "title": "Points Available"
+          }
+        },
+        "type": "object",
+        "required": [
+          "started_at",
+          "deadline",
+          "server_now",
+          "limit_seconds",
+          "elapsed_seconds",
+          "remaining_seconds",
+          "expired",
+          "attempt",
+          "solved",
+          "awarded_points",
+          "legacy_scoring",
+          "points_available"
+        ],
+        "title": "Timing"
       },
       "Treasure": {
         "properties": {

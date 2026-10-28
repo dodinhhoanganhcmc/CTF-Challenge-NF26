@@ -2,6 +2,8 @@ import { expect, test, type Page, type Locator } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import fs from 'node:fs';
 import { decode } from '../lib/game';
+import { execFileSync } from 'node:child_process';
+import path from 'node:path';
 
 const base = 'http://127.0.0.1:3100';
 const headers = { origin: base, 'x-expedition': '1' };
@@ -126,6 +128,8 @@ for (const mode of ['easy', 'hard']) {
     for (let stage = 1; stage <= 5; stage++) {
       await expect(page.locator('.mission-top')).toContainText(`0${stage}`);
       await expect(page.getByLabel('MANH MỐI CỦA BẠN', { exact: true })).not.toHaveValue('');
+      await expect(page.getByRole('timer', { name: 'Thời gian còn lại' })).toBeVisible();
+      await expect(page.locator('.clock-limit')).toContainText(mode === 'easy' ? '3 phút' : '7 phút');
       await expect(page.getByLabel('MANH MỐI CỦA BẠN', { exact: true })).toHaveCSS('font-family', /Poppins/);
       if (stage === 1) {
         const a11y = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze();
@@ -167,7 +171,10 @@ for (const mode of ['easy', 'hard']) {
     const code = await page.getByTestId('reward-code').textContent();
     await page.getByRole('button', { name: 'Ghi dấu trên bảng xếp hạng' }).click();
     await expect(page.getByRole('table')).toContainText(`Captain ${mode}`);
-    await expect(page.getByRole('table')).toContainText('3000');
+    const savedPoints = (await (await page.request.get('/api/v1/session')).json()).modes[mode].points;
+    expect(savedPoints).toBeGreaterThan(2500);
+    expect(savedPoints).toBeLessThanOrEqual(3000);
+    await expect(page.getByRole('table')).toContainText(String(savedPoints));
     await page.getByRole('button', { name: 'Đóng', exact: true }).click();
     await page.reload();
     if (mode === 'hard') await page.getByRole('button', { name: 'Hard Thử sức' }).click();
@@ -176,6 +183,36 @@ for (const mode of ['easy', 'hard']) {
     expect(errors).toEqual([]);
   });
 }
+
+test('a second tab receives a restarted attempt and immutable solved timer', async ({ page, context }) => {
+  await enter(page, 'Two tabs');
+  const second = await context.newPage();
+  await second.goto('/');
+  await expect(second.getByRole('timer')).toBeVisible();
+  const oldClue = await second.getByLabel('MANH MỐI CỦA BẠN', { exact: true }).inputValue();
+  await ageStage(page, 'easy', 180);
+  const session = await (await page.request.get('/api/v1/session')).json();
+  const restarted = await page.request.post('/api/v1/stages/1/retries?mode=easy', { headers: { ...headers, 'x-csrf-token': session.csrf }, data: {} });
+  expect(restarted.status()).toBe(200);
+  await second.bringToFront();
+  await second.evaluate(() => window.dispatchEvent(new Event('focus')));
+  await expect(second.locator('.clock-limit')).toContainText('Lượt 2');
+  await expect(second.getByLabel('MANH MỐI CỦA BẠN', { exact: true })).not.toHaveValue(oldClue);
+  const currentFlag = await solveFromArtifact(second, 'easy', 1);
+  const solved = await page.request.post('/api/v1/stages/1/answers?mode=easy', { headers: { ...headers, 'x-csrf-token': session.csrf }, data: { flag: currentFlag } });
+  expect((await solved.json()).correct).toBe(true);
+  await second.evaluate(() => window.dispatchEvent(new Event('focus')));
+  await expect(second.locator('.success')).toBeVisible();
+  await expect(second.locator('.success')).toContainText('Bạn vừa học encoding');
+  await expect(second.getByRole('timer', { name: 'Thời gian giải' })).toBeVisible();
+  const timing = await (await second.request.get('/api/v1/stages/1/timing?mode=easy')).json();
+  await second.reload();
+  // Resume selects the next stage; the solved-stage clock stays frozen in the API.
+  const reread = await (await second.request.get('/api/v1/stages/1/timing?mode=easy')).json();
+  expect(reread.elapsed_seconds).toBe(timing.elapsed_seconds);
+  expect(reread.awarded_points).toBe(timing.awarded_points);
+  await second.close();
+});
 
 test('hints, download, journal, guide, replay and theme controls', async ({ page }) => {
   await enter(page);
@@ -298,3 +335,80 @@ test('official logo assets are served and authorize the real reward artwork', as
     expect((await response.body()).length).toBeGreaterThan(10000);
   }
 });
+
+async function ageStage(page: Page, mode: string, seconds: number) {
+  const token = (await page.context().cookies()).find(cookie => cookie.name === 'expedition')!.value;
+  expect(process.env.E2E_DATABASE_PATH).toBeTruthy();
+  execFileSync(path.resolve('.venv/Scripts/python.exe'), ['-c',
+    `import sqlite3,hashlib,sys
+with sqlite3.connect(sys.argv[1]) as db:
+ db.execute("UPDATE stage_timers SET started=started-?,deadline=deadline-? WHERE session=? AND mode=? AND stage=1",(float(sys.argv[4]),float(sys.argv[4]),hashlib.sha256(sys.argv[2].encode()).hexdigest(),sys.argv[3]))`,
+    process.env.E2E_DATABASE_PATH!, token, mode, String(seconds)]);
+}
+
+for (const mode of ['easy', 'hard']) {
+  test(`server-owned ${mode} countdown, reload, expiry, retry and score`, async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 1000 });
+    await enter(page, `Timer ${mode}`);
+    if (mode === 'hard') await page.getByRole('button', { name: 'Hard Thử sức' }).click();
+    await expect(page.getByRole('timer')).toBeVisible();
+    const limit = mode === 'easy' ? 180 : 420;
+    const initial = await (await page.request.get(`/api/v1/stages/1/timing?mode=${mode}`)).json();
+    expect(initial.limit_seconds).toBe(limit);
+    const oldFlag = await solveFromArtifact(page, mode, 1);
+    await page.getByRole('button', { name: /Cần một chút gợi ý/ }).click();
+    await expect(page.locator('.hints ol li')).toHaveCount(1);
+    // Alter only the isolated E2E SQLite clock, never a production API or wall clock.
+    await ageStage(page, mode, limit / 2);
+    await page.reload();
+    if (mode === 'hard') await page.getByRole('button', { name: 'Hard Thử sức' }).click();
+    await expect(page.locator('.clock-limit')).toContainText(mode === 'easy' ? '3 phút' : '7 phút');
+    const middle = await (await page.request.get(`/api/v1/stages/1/timing?mode=${mode}`)).json();
+    expect(middle.deadline).toBeCloseTo(initial.deadline - limit / 2, 3);
+    const displayed = () => page.getByTestId('stage-timer').textContent();
+    const before = await displayed();
+    await expect.poll(displayed).not.toBe(before);
+    const middlePoints = Number(await page.getByTestId('live-points').textContent());
+    expect(middlePoints).toBeLessThanOrEqual(125);
+    // A local system-date jump does not restore time; countdown uses performance.now.
+    await page.evaluate(() => { Date.now = () => 0; });
+    const afterDateChange = await displayed();
+    await expect.poll(displayed).not.toBe(afterDateChange);
+    await ageStage(page, mode, limit);
+    const state = await (await page.request.get('/api/v1/session')).json();
+    const denied = await page.request.post(`/api/v1/stages/1/answers?mode=${mode}`, {
+      headers: { ...headers, 'x-csrf-token': state.csrf }, data: { flag: oldFlag },
+    });
+    expect(denied.status()).toBe(409);
+    await page.evaluate(() => window.dispatchEvent(new Event('focus')));
+    await expect(page.locator('.timeout-state')).toContainText('Hết giờ');
+    await expect(page.getByRole('button', { name: 'Kiểm tra flag', exact: true })).toBeDisabled();
+    await expect(page.getByTestId('stage-timer')).toHaveText('00:00');
+    expect((await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze()).violations).toEqual([]);
+    await page.screenshot({ path: `evidence/screenshots/${mode}-timeout.png`, fullPage: true });
+    const noCsrf = await page.request.post(`/api/v1/stages/1/retries?mode=${mode}`, { headers, data: {} });
+    expect(noCsrf.status()).toBe(403);
+    await page.getByRole('button', { name: 'Chơi lại bài', exact: true }).click();
+    await expect(page.locator('.clock-limit')).toContainText('Lượt 2');
+    await expect(page.locator('.timeout-state')).toHaveCount(0);
+    await expect(page.locator('.hints ol li')).toHaveCount(1);
+    const nextFlag = await solveFromArtifact(page, mode, 1);
+    expect(nextFlag).not.toBe(oldFlag);
+    await page.getByLabel('Bạn tìm được flag nào?').fill(oldFlag);
+    await page.getByRole('button', { name: 'Kiểm tra flag', exact: true }).click();
+    await expect(page.locator('.mission-panel').getByRole('alert')).toContainText('Chưa đúng');
+    await page.getByLabel('Bạn tìm được flag nào?').fill(nextFlag);
+    await page.getByRole('button', { name: 'Kiểm tra flag', exact: true }).click();
+    await expect(page.locator('.success')).toBeVisible();
+    await expect(page.getByRole('timer', { name: 'Thời gian giải' })).toBeVisible();
+    const frozen = await page.getByTestId('stage-timer').textContent();
+    const solved = await (await page.request.get(`/api/v1/stages/1/timing?mode=${mode}`)).json();
+    expect(solved.solved).toBe(true);
+    expect(solved.awarded_points).toBeLessThanOrEqual(87);
+    expect(solved.awarded_points).toBeGreaterThan(70);
+    await page.getByRole('button', { name: 'Đến địa điểm tiếp theo' }).click();
+    await expect(page.locator('.mission-top')).toContainText('02');
+    await expect(page.locator('.clock-limit')).toContainText('Lượt 1');
+    expect(frozen).not.toBeNull();
+  });
+}

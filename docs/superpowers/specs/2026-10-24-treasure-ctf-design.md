@@ -28,3 +28,7 @@ No undecided functional requirements. Deployment assumptions documented; no mult
 
 ## Confirmed continuation
 Organizer: CMC Infrasec. NextFest 26 reward: club-logo sticker after five solves. Official primary and alternative logos were supplied on 2026-10-26 and installed with theme-aware opaque rendering. A completion code is available for local organizer lookup; physical handout remains in person.
+
+## User-requested timing extension / 2026-10-28
+
+Supersedes fixed stage points: each Easy stage has 180 seconds, Hard 420 seconds. Countdown starts at first stage access and is persisted server-side; expiry rejects submissions. Score combines half the base weight score with proportional remaining-time bonus minus hints. Retry policy, compatibility and proof gates are defined in docs/timed-stages.md. No prior solve/score is overwritten.

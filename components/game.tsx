@@ -2,8 +2,9 @@
 
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { ArrowRightIcon, ArrowDownIcon, CompassIcon, MapTrifoldIcon, FlagIcon, LockKeyIcon, CheckIcon, TreasureChestIcon, FlaskIcon, TreeIcon, BinocularsIcon, LighthouseIcon, MountainsIcon, SunIcon, MoonIcon, BookOpenIcon, TrophyIcon, XIcon, DownloadSimpleIcon, LightbulbIcon, CopyIcon, CircleNotchIcon, ArrowCounterClockwiseIcon } from '@phosphor-icons/react';
-import { api, decode, message, type Clue, type Entry, type Mode, type Reward, type Session, type Stage } from '@/lib/game';
+import { api, decode, message, type Clue, type Entry, type Mode, type Reward, type Session, type Stage, type Timing } from '@/lib/game';
 import ClubLogo from '@/components/club-logo';
+import StageClock from '@/components/stage-clock';
 
 const icons = [FlaskIcon, TreeIcon, BinocularsIcon, LighthouseIcon, MountainsIcon];
 const positions = [{ left: '15%', top: '66%' }, { left: '34%', top: '33%' }, { left: '53%', top: '62%' }, { left: '72%', top: '29%' }, { left: '87%', top: '60%' }];
@@ -86,10 +87,15 @@ export default function Game() {
   const [panelError, setPanelError] = useState('');
   const [panelLoading, setPanelLoading] = useState(false);
   const [copied, setCopied] = useState('');
+  const [timeExpired, setTimeExpired] = useState(false);
+  const [timerError, setTimerError] = useState('');
+  const [timerRefresh, setTimerRefresh] = useState(0);
+  const timerGeneration = useRef(0);
   const progress = guest?.modes[mode];
   const solved = progress?.solved || [];
   const current = Math.min(5, solved.length + 1);
   const isSolved = solved.includes(selected);
+  const expired = !isSolved && (timeExpired || !!clue?.timing.expired);
   const missionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -106,13 +112,54 @@ export default function Game() {
   }, [retry]);
 
   useEffect(() => {
-    setClue(null); setStageError(''); setFlag(''); setFeedback('');
+    setClue(null); setStageError(''); setFlag(''); setFeedback(''); setTimeExpired(false); setTimerError('');
     if (!guest) return;
     const controller = new AbortController();
     api<Clue>(`stages/${selected}?mode=${mode}`, undefined, undefined, controller.signal)
       .then(data => setClue({ ...data, mode })).catch(e => { if (!controller.signal.aborted) setStageError(message(e)); });
     return () => controller.abort();
   }, [guest?.csrf, mode, selected, retry]); // Progress updates don't erase success feedback.
+
+  useEffect(() => {
+    if (!guest || !clue || clue.id !== selected || clue.mode !== mode || isSolved) return;
+    const controller = new AbortController();
+    let pending = false;
+    async function sync() {
+      if (pending || controller.signal.aborted || document.visibilityState === 'hidden') return;
+      pending = true;
+      const generation = timerGeneration.current;
+      const sent = performance.now();
+      try {
+        const data = await api<Timing>(`stages/${selected}/timing?mode=${mode}`, undefined, undefined, controller.signal);
+        if (controller.signal.aborted || generation !== timerGeneration.current) return;
+        // Conservatively subtract the round trip; never extend the server deadline in the UI.
+        data.remaining_seconds = Math.max(0, data.remaining_seconds - (performance.now() - sent) / 1000);
+        if (data.attempt !== clue!.timing.attempt) {
+          const changed = await api<Clue>(`stages/${selected}?mode=${mode}`, undefined, undefined, controller.signal);
+          if (controller.signal.aborted || generation !== timerGeneration.current) return;
+          setClue({ ...changed, mode }); setFlag(''); setFeedback(''); setCopied('');
+        } else {
+          setClue(previous => previous && previous.id === selected && previous.mode === mode ? { ...previous, timing: data } : previous);
+        }
+        setTimeExpired(data.expired || data.remaining_seconds <= 0); setTimerError('');
+        if (data.solved) {
+          const [saved, completed] = await Promise.all([
+            api<Session>('session', undefined, undefined, controller.signal),
+            api<Clue>(`stages/${selected}?mode=${mode}`, undefined, undefined, controller.signal),
+          ]);
+          if (!controller.signal.aborted && generation === timerGeneration.current) {
+            setGuest(saved); setClue({ ...completed, mode });
+          }
+        }
+      } catch (e) { if (!controller.signal.aborted) setTimerError('Chưa đồng bộ được đồng hồ. Hạn nộp vẫn theo server; hãy kết nối lại.'); }
+      finally { pending = false; }
+    }
+    const interval = setInterval(sync, 10000);
+    window.addEventListener('focus', sync);
+    document.addEventListener('visibilitychange', sync);
+    if (timerRefresh) void sync();
+    return () => { controller.abort(); clearInterval(interval); window.removeEventListener('focus', sync); document.removeEventListener('visibilitychange', sync); };
+  }, [guest?.csrf, clue?.id, clue?.timing.attempt, mode, selected, isSolved, timerRefresh]);
 
   useEffect(() => {
     if (panel !== 'leaderboard' && panel !== 'treasure') return;
@@ -130,38 +177,55 @@ export default function Game() {
     event?.preventDefault(); setBusy(true); setError('');
     try {
       const data = await api<Session>('session', { name: replay ? guest?.name : name.trim() });
+      timerGeneration.current++;
       setGuest(data); setSelected(1); setReward(null); setPanel(null); setFeedback('');
     } catch (e) { setError(message(e)); } finally { setBusy(false); }
   }
   function choose(id: number) {
     if (busy || id > current) return;
+    if (id !== selected) timerGeneration.current++;
     setSelected(id);
     if (window.innerWidth < 1000) missionRef.current?.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'start' });
   }
   function changeMode(value: Mode) {
     if (busy) return;
+    if (value !== mode) timerGeneration.current++;
     setMode(value); setSelected(Math.min(5, (guest?.modes[value].solved.length || 0) + 1)); setReward(null); setBoardOffset(0); setError('');
   }
   async function submit(event: FormEvent) {
     event.preventDefault(); if (!guest) return;
     setBusy(true); setError(''); setFeedback('');
     try {
-      const data = await api<{ correct: boolean; detail?: string; debrief?: string; session?: Session }>(`stages/${selected}/answers?mode=${mode}`, { flag }, guest.csrf);
-      if (data.correct && data.session) { setGuest(data.session); setFeedback(data.debrief!); }
+      const data = await api<{ correct: boolean; detail?: string; debrief?: string; session?: Session; timing?: Timing }>(`stages/${selected}/answers?mode=${mode}`, { flag }, guest.csrf);
+      if (data.correct && data.session) {
+        timerGeneration.current++;
+        setGuest(data.session); setFeedback(data.debrief!);
+        if (data.timing) setClue(previous => previous ? { ...previous, timing: data.timing! } : previous);
+      }
       else setError(data.detail || 'Kiểm tra lại flag nhé.');
-    } catch (e) { setError(message(e)); } finally { setBusy(false); }
+    } catch (e) { setError(message(e)); setTimerRefresh(value => value + 1); } finally { setBusy(false); }
   }
   async function hint() {
     if (!guest || !clue) return;
     setBusy(true); setError('');
     try {
       const data = await api<{ hints: string[] }>(`stages/${selected}/hints?mode=${mode}`, {}, guest.csrf);
-      setClue({ ...clue, hints: data.hints });
-    } catch (e) { setError(message(e)); } finally { setBusy(false); }
+      setClue(previous => previous ? { ...previous, hints: data.hints } : previous);
+    } catch (e) { setError(message(e)); setTimerRefresh(value => value + 1); } finally { setBusy(false); }
   }
   async function copy(text: string) {
     try { await navigator.clipboard.writeText(text); setCopied('Đã sao chép.'); }
     catch { setCopied('Hãy chọn phần văn bản và sao chép thủ công.'); }
+  }
+  async function retryStage() {
+    if (!guest) return;
+    timerGeneration.current++;
+    setBusy(true); setError('');
+    try {
+      const data = await api<Clue>(`stages/${selected}/retries?mode=${mode}`, {}, guest.csrf);
+      setClue({ ...data, mode }); setFlag(''); setFeedback(''); setCopied(''); setTimeExpired(false); setTimerError('');
+    } catch (e) { setError(message(e)); setTimerRefresh(value => value + 1); }
+    finally { setBusy(false); }
   }
   function openBoard() { setBoardOffset(0); setPanel('leaderboard'); }
 
@@ -223,19 +287,22 @@ export default function Game() {
           {loading ? <div className="empty-state" role="status"><CircleNotchIcon className="spin" size={32} /><h2>Đang trải hải đồ…</h2><p>Chuẩn bị cho chuyến đi của bạn.</p></div> : !guest ? <div className="onboarding">
             <span className="eyebrow">THUYỀN ĐÃ SẴN SÀNG</span><span className="welcome-icon"><FlagIcon size={34} weight="duotone" /></span><h2>Thuyền trưởng,<br />bạn tên gì?</h2><p>Chọn một tên hiển thị. Không tài khoản, không mật khẩu. Chỉ cần một chút tò mò.</p>
             <form onSubmit={enter}><label htmlFor="guest-name">Tên trên bảng xếp hạng</label><input id="guest-name" name="name" autoComplete="nickname" minLength={2} maxLength={24} required value={name} onChange={e => setName(e.target.value)} placeholder="Ví dụ: Thuyền trưởng Mèo" /><button className="button full" disabled={busy || name.trim().length < 2} type="submit">{busy ? 'Đang lên thuyền…' : 'Bắt đầu thám hiểm'}<ArrowRightIcon size={20} /></button></form>
-            <p className="small privacy-note">Tên và điểm sẽ xuất hiện công khai trên BXH. Tiến độ lưu theo trình duyệt trong 30 ngày.</p>
+            <p className="small privacy-note">Mỗi bài {mode === 'easy' ? 'Easy có 3 phút' : 'Hard có 7 phút'}, bắt đầu khi mở manh mối. Giải nhanh được nhiều điểm hơn; đổi tab hoặc tải lại không dừng giờ. Tên và điểm công khai trên BXH; tiến độ lưu theo trình duyệt trong 30 ngày.</p>
             <button className="text-button" onClick={() => setPanel('guide')}>Lần đầu nghe về CTF? <ArrowRightIcon /></button>
           </div> : stageError ? <div className="empty-state"><h2>Manh mối chưa đến nơi</h2><p role="alert">{stageError}</p><button className="button" onClick={() => setRetry(r => r + 1)}>Thử lại</button></div> : !clue || clue.id !== selected || clue.mode !== mode ? <div className="empty-state" role="status"><CircleNotchIcon className="spin" size={30} /><p>Đang tìm manh mối…</p></div> : <>
             <div className="mission-top"><span className="eyebrow">NHIỆM VỤ / 0{selected}</span><span className="category">{clue.category} <span>{clue.weight}/10</span></span></div>
             <h2>{clue.title}</h2><p className="mission-story">{clue.summary}</p>
+            <StageClock key={`clock-${mode}-${selected}-${clue.timing.attempt}`} timing={clue.timing} weight={clue.weight} hints={clue.hints.length} onExpired={() => setTimeExpired(true)} />
+            {timerError && <p className="small" role="status">{timerError} <button className="text-button" onClick={() => setTimerRefresh(value => value + 1)}>Đồng bộ lại</button></p>}
+            {expired && <div className="timeout-state" role="status"><strong>Hết giờ cho bài này</strong><p>Flag cũ đã khóa nộp. Chơi lại bài với {mode === 'easy' ? '3' : '7'} phút và flag mới; điểm còn tối đa 50%, gợi ý đã mở vẫn được tính. Các mảnh đã có được giữ nguyên.</p><button className="button full" disabled={busy} onClick={retryStage}>{busy ? 'Đang chuẩn bị…' : 'Chơi lại bài'}<ArrowCounterClockwiseIcon /></button></div>}
             <div className="objective"><FlagIcon size={20} /><p>{clue.objective}</p></div>
             <div className="clue-heading"><label htmlFor="clue-data">MANH MỐI CỦA BẠN</label><button className="icon-button" aria-label="Sao chép manh mối" onClick={() => copy(clue.payload)}><CopyIcon size={17} /></button></div>
             <textarea readOnly id="clue-data" className="clue-data" value={clue.payload} rows={selected === 3 || selected === 4 ? 6 : 3} spellCheck={false} />
-            <a className="artifact-link" href={`/api/v1/stages/${selected}/artifact?mode=${mode}`} download={clue.artifact_name}><DownloadSimpleIcon /> Tải {clue.artifact_name}</a>
-            {mode === 'easy' ? <Bench key={`${mode}-${selected}`} clue={clue} useResult={setFlag} /> : <p className="hard-note small">Hard: tự chọn công cụ và nhận diện lớp mã. Ảnh PNG có thể đọc metadata bằng ExifTool hoặc Pillow.</p>}
+            {!expired && <a className="artifact-link" href={`/api/v1/stages/${selected}/artifact?mode=${mode}`} download={clue.artifact_name}><DownloadSimpleIcon /> Tải {clue.artifact_name}</a>}
+            {mode === 'easy' ? <Bench key={`bench-${mode}-${selected}-${clue.timing.attempt}`} clue={clue} useResult={setFlag} /> : <p className="hard-note small">Hard: tự chọn công cụ và nhận diện lớp mã. Ảnh PNG có thể đọc metadata bằng ExifTool hoặc Pillow.</p>}
             {isSolved ? <div className="success" role="status"><span className="success-title"><CheckIcon size={22} weight="bold" /> Đã tìm thấy mảnh la bàn!</span><p>{feedback || clue.debrief}</p><button className="button full" onClick={() => selected === 5 ? setPanel('treasure') : choose(selected + 1)}>{selected === 5 ? 'Mở kho báu' : 'Đến địa điểm tiếp theo'}<ArrowRightIcon /></button></div> : <>
-              <form onSubmit={submit} className="flag-form"><label htmlFor="flag">Bạn tìm được flag nào?</label><input id="flag" name="flag" value={flag} onChange={e => setFlag(e.target.value)} placeholder="DAO{...}" maxLength={160} required spellCheck={false} autoComplete="off" /><button className="button full" type="submit" disabled={busy || !flag.trim()}>{busy ? 'Đang kiểm tra…' : 'Kiểm tra flag'}<ArrowRightIcon /></button></form>
-              <div className="hints"><button className="text-button" disabled={busy || clue.hints.length === 3} onClick={hint}><LightbulbIcon size={18} />{clue.hints.length === 3 ? 'Đã mở hết gợi ý' : 'Cần một chút gợi ý?'}<span>{clue.hints.length}/3</span></button><small>Mỗi gợi ý trừ 25 điểm. Sai flag không trừ điểm.</small>{clue.hints.length > 0 && <ol>{clue.hints.map(h => <li key={h}>{h}</li>)}</ol>}</div>
+              <form onSubmit={submit} className="flag-form"><label htmlFor="flag">Bạn tìm được flag nào?</label><input id="flag" name="flag" value={flag} disabled={expired} onChange={e => setFlag(e.target.value)} placeholder="DAO{...}" maxLength={160} required spellCheck={false} autoComplete="off" /><button className="button full" type="submit" disabled={busy || expired || !flag.trim()}>{busy ? 'Đang kiểm tra…' : 'Kiểm tra flag'}<ArrowRightIcon /></button></form>
+              <div className="hints"><button className="text-button" disabled={busy || expired || clue.hints.length === 3} onClick={hint}><LightbulbIcon size={18} />{clue.hints.length === 3 ? 'Đã mở hết gợi ý' : 'Cần một chút gợi ý?'}<span>{clue.hints.length}/3</span></button><small>Mỗi gợi ý trừ 25 điểm. Giải nhanh được nhiều điểm hơn.</small>{clue.hints.length > 0 && <ol>{clue.hints.map(h => <li key={h}>{h}</li>)}</ol>}</div>
             </>}
           </>}
           {error && <div className="error" role="alert">{error}{!guest && <button className="text-button" onClick={() => setRetry(r => r + 1)}>Kết nối lại</button>}</div>}
@@ -247,7 +314,7 @@ export default function Game() {
     <footer><div className="footer-bottom"><span>(c) CMC Infrasec x NextFest '26</span></div></footer>
 
     {panel && <Modal title={{ guide: 'Sổ tay tân binh', journal: 'Nhật ký thám hiểm', leaderboard: 'Bảng xếp hạng', replay: 'Bắt đầu chuyến đi mới?', treasure: 'Kho báu của bạn!' }[panel]} onClose={() => setPanel(null)}>
-      {panel === 'guide' && <div className="guide-content"><p className="lead">CTF là trò tìm “lá cờ” — một chuỗi ký tự bí mật ẩn trong dữ liệu.</p><ol className="guide-steps"><li><strong>Đọc manh mối.</strong> Mỗi địa điểm dạy một kỹ năng mới. Easy có công cụ và ví dụ HELLO để bạn thử trước.</li><li><strong>Tìm chuỗi <code>DAO{'{...}'}</code>.</strong> Sao chép đủ dấu ngoặc, giữ nguyên chữ hoa. Không cần cài phần mềm khi chơi Easy.</li><li><strong>Nộp flag và ghép la bàn.</strong> Đúng thì mở địa điểm mới. Sai thì thử lại; điểm không bị trừ.</li><li><strong>Đến kho báu.</strong> Giải đủ năm màn rồi đưa mã hoàn thành cho ban tổ chức để nhận sticker logo CMC Infrasec tại NextFest 26.</li></ol><div className="guide-note"><h3>Điểm & độ khó</h3><p>Weight 2 → 10 là độ khó tương đối. Điểm mỗi màn = weight × 100 − 25 × số gợi ý. Tối đa 3.000 điểm mỗi mode. BXH ưu tiên số màn → điểm → thời gian hoàn thành.</p><p>Easy và Hard lưu tiến độ riêng. Tên có thể trùng; cookie mới là định danh. Giữ cookie để tiếp tục chuyến đi.</p></div><button className="button full" onClick={() => setPanel(null)}>Đã hiểu, lên đường thôi! <ArrowRightIcon /></button></div>}
+      {panel === 'guide' && <div className="guide-content"><p className="lead">CTF là trò tìm “lá cờ” — một chuỗi ký tự bí mật ẩn trong dữ liệu.</p><ol className="guide-steps"><li><strong>Đọc manh mối.</strong> Mỗi địa điểm dạy một kỹ năng mới. Easy có công cụ và ví dụ HELLO để bạn thử trước.</li><li><strong>Tìm chuỗi <code>DAO{'{...}'}</code>.</strong> Sao chép đủ dấu ngoặc, giữ nguyên chữ hoa. Không cần cài phần mềm khi chơi Easy.</li><li><strong>Nộp flag và ghép la bàn.</strong> Đúng thì mở địa điểm mới. Sai thì thử lại; điểm không bị trừ.</li><li><strong>Đến kho báu.</strong> Giải đủ năm màn rồi đưa mã hoàn thành cho ban tổ chức để nhận sticker logo CMC Infrasec tại NextFest 26.</li></ol><div className="guide-note"><h3>Điểm & độ khó</h3><p>Weight 2 → 10 là độ khó tương đối. Easy: 3 phút/bài; Hard: 7 phút/bài. Đồng hồ bắt đầu khi mở bài lần đầu, vẫn chạy khi tải lại trang, đổi mode hoặc đóng tab. Điểm = một nửa điểm gốc + thưởng theo phần thời gian còn lại − 25 × số gợi ý, làm tròn xuống. Điểm gốc = weight × 100; tối đa 3.000 điểm/mode. Hết giờ khóa nộp flag; chơi lại bài có flag mới, thời gian mới và điểm giảm 50%, không xóa mảnh đã có. BXH ưu tiên số màn → điểm → thời gian hoàn thành.</p><p>Easy và Hard lưu tiến độ riêng. Tên có thể trùng; cookie mới là định danh. Giữ cookie để tiếp tục chuyến đi. Điểm các màn đã giải trước cập nhật được giữ nguyên, không tính lại khi thiếu dữ liệu thời gian.</p></div><button className="button full" onClick={() => setPanel(null)}>Đã hiểu, lên đường thôi! <ArrowRightIcon /></button></div>}
       {panel === 'journal' && <div><p className="muted">Những điều bạn đã khám phá · {mode === 'easy' ? 'Easy' : 'Hard'}</p>{!solved.length ? <div className="empty-state"><BookOpenIcon size={38} /><p>Trang đầu vẫn còn trống.<br />Giải manh mối đầu tiên để viết câu chuyện của bạn.</p></div> : <ol className="journal-list">{stages.filter(s => solved.includes(s.id)).map(s => <li key={s.id}><CheckIcon /><div><strong>{s.location}</strong><p>{s.category} · Đã thu thập mảnh 0{s.id}</p><button className="text-button" onClick={() => { choose(s.id); setPanel(null); }}>Đọc lại bài học <ArrowRightIcon /></button></div></li>)}</ol>}</div>}
       {panel === 'leaderboard' && <><div className="board-toolbar"><p>{mode === 'easy' ? 'Easy · Khởi đầu' : 'Hard · Thử sức'}</p><button className="text-button" onClick={() => changeMode(mode === 'easy' ? 'hard' : 'easy')}>Xem {mode === 'easy' ? 'Hard' : 'Easy'} <ArrowRightIcon /></button></div><p className="small">Số màn → điểm → thời gian hoàn thành. Tên guest có thể trùng.</p>{!panelLoading && !panelError && (entries.length ? <div className="table-scroll"><table><caption className="sr-only">Thứ hạng người chơi {mode}</caption><thead><tr><th>#</th><th>Thuyền trưởng</th><th>Mảnh</th><th>Điểm</th><th>Thời gian</th></tr></thead><tbody>{entries.map((e, i) => <tr key={i}><td>{boardOffset + i + 1}</td><td>{e.name}</td><td>{e.solved}/5</td><td>{e.points}</td><td>{e.seconds === null ? 'Đang chơi' : `${Math.floor(e.seconds / 60)}p ${e.seconds % 60}s`}</td></tr>)}</tbody></table></div> : <div className="empty-state"><TrophyIcon size={38} /><p>Chưa có thuyền trưởng nào trên bảng.<br />Giải màn đầu tiên để ghi tên bạn!</p></div>)}<div className="button-row"><button className="button secondary small-button" disabled={boardOffset === 0 || panelLoading} onClick={() => setBoardOffset(v => Math.max(0, v - 20))}>Trang trước</button><span className="small">{boardTotal} chuyến đi</span><button className="button secondary small-button" disabled={boardOffset + 20 >= boardTotal || panelLoading} onClick={() => setBoardOffset(v => v + 20)}>Trang sau</button></div></>}
       {panel === 'replay' && <><p>Tiến độ và điểm hiện tại vẫn giữ trên BXH, nhưng trình duyệt sẽ chuyển sang một chuyến đi mới với flag mới. Chuyến cũ sẽ không còn truy cập bằng cookie này.</p><p>Tên hiển thị: <strong>{guest?.name}</strong></p><div className="button-row"><button className="button secondary" onClick={() => setPanel(null)}>Ở lại chuyến này</button><button className="button" disabled={busy} onClick={() => enter(undefined, true)}>Tạo chuyến mới <ArrowRightIcon /></button></div>{error && <p className="error" role="alert">{error}</p>}</>}
